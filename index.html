@@ -69,7 +69,7 @@ p{margin:0}
 /* header */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line)}
 .topbar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 28px;padding-top:12px}
-.brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.brand{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-width:0}
 .wordmark{font-size:24px;letter-spacing:.04em}
 .count{white-space:nowrap;font-variant-numeric:tabular-nums}
 .tabs{flex:1 1 280px;max-width:420px;display:grid;grid-template-columns:repeat(3,1fr)}
@@ -116,6 +116,17 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 .tag-meta{font-family:var(--f-mono);font-size:10.5px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .piece.flash{outline:3px solid var(--accent);outline-offset:2px}
 .empty{display:grid;gap:12px;justify-items:start;padding:28px 0}
+.backup{display:grid;gap:10px;justify-items:start;margin-top:8px;padding-top:20px;border-top:1px dashed var(--line)}
+.backup .hint{max-width:60ch}
+.profbtn{display:inline-flex;align-items:center;gap:8px;min-height:36px;max-width:100%;padding:0 12px 0 4px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-weight:600;font-size:14px;cursor:pointer}
+.profbtn .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:14ch}
+.av{width:28px;height:28px;border-radius:50%;background:var(--c,#1E6B55);color:#fff;display:inline-grid;place-items:center;font-family:var(--f-display);font-stretch:80%;font-weight:800;font-size:14px;flex:none}
+.plist{display:grid;gap:8px}
+.pitem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;min-height:56px;width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);text-align:left;cursor:pointer}
+.pitem[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.pitem b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pitem .av{width:36px;height:36px;font-size:17px}
+.perr{color:var(--danger);font-size:13.5px}
 
 /* add */
 .drop{display:grid;gap:16px;justify-items:start;padding:26px 20px;border:1.5px dashed var(--line);border-radius:10px;background:var(--surface)}
@@ -182,7 +193,7 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 <body>
 
 <header class="top"><div class="gut"><div class="inner topbar">
-  <div class="brand"><h1 class="wordmark">Digital Closet</h1><span class="count mono" id="count" aria-live="polite">&nbsp;</span></div>
+  <div class="brand"><h1 class="wordmark">Digital Closet</h1><button type="button" class="profbtn" id="prof-btn" data-act="prof-open" aria-haspopup="dialog"></button><span class="count mono" id="count" aria-live="polite">&nbsp;</span></div>
   <nav class="tabs" aria-label="Sections">
     <button type="button" data-act="tab" data-v="closet" aria-current="page">Closet</button>
     <button type="button" data-act="tab" data-v="add" aria-current="false">Add</button>
@@ -201,6 +212,15 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
     <h2>Nothing here yet</h2>
     <p class="lead">Add photos of your clothes. The backgrounds come off automatically.</p>
     <button type="button" class="btn primary" data-act="tab" data-v="add">Add clothes</button>
+  </div>
+  <div class="backup">
+    <span class="lbl">Use on another device</span>
+    <p class="hint">Save a backup file, send it to your other iPhone or iPad (AirDrop works well), then tap Restore there. Pieces and looks are merged in, and nothing is erased.</p>
+    <div class="row">
+      <button type="button" class="btn small" data-act="bk-save">Save backup</button>
+      <button type="button" class="btn small" data-act="bk-load">Restore backup</button>
+    </div>
+    <input type="file" id="file-bk" hidden>
   </div>
 </section>
 
@@ -283,6 +303,7 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 </div></main>
 
 <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Piece details" tabindex="-1"></div></div>
+<div class="scrim" id="pscrim" hidden><div class="sheet" id="psheet" role="dialog" aria-modal="true" aria-label="Profiles" tabindex="-1"></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
@@ -490,7 +511,8 @@ for (const c of COLORS) { const [r, g, b] = hexRgb(c.hex); c.lab = [0, 0, 0]; rg
 const state = {
   items: [], outfits: [], view: 'closet', filter: 'all', occasion: 'any', weather: 'mild', locks: {},
   current: null, alts: [], genMsg: '', genNote: '', queue: [], loading: false, ed: null,
-  batchTotal: 0, batchIndex: 0, sheetId: null, sheetOpener: null, lastCat: 'top', flashId: null, outfitsDirty: true
+  batchTotal: 0, batchIndex: 0, sheetId: null, sheetOpener: null, lastCat: 'top', flashId: null, outfitsDirty: true,
+  profiles: [], pid: 'me', lock: null, pf: { mode: 'list', name: '', color: '', editId: '', err: '' }
 };
 
 // ---------- storage (IndexedDB, with an in-memory fallback)
@@ -554,6 +576,7 @@ function show(view) {
 }
 
 function renderCloset() {
+  renderProfileChip();
   const items = state.items;
   $('#count').textContent = `${items.length} ${items.length === 1 ? 'piece' : 'pieces'}`;
   $('#notice').hidden = DB.isPersistent();
@@ -733,7 +756,7 @@ async function edSave() {
   let blob = await toBlob(crop, 'image/webp', 0.92);
   if (!blob || blob.type !== 'image/webp') blob = await toBlob(crop, 'image/png');
   const name = $('#f-name').value.trim() || `Untitled ${CAT[ed.cat].one.toLowerCase()}`;
-  const it = { id: uid(), name, cat: ed.cat, color: ed.color, style: ed.style, weight: ed.weight, fav: false, blob, w: cw, h: ch, added: Date.now(), lastWorn: null };
+  const it = { id: uid(), name, cat: ed.cat, color: ed.color, style: ed.style, weight: ed.weight, fav: false, blob, w: cw, h: ch, added: Date.now(), lastWorn: null, pid: state.pid };
   it.url = URL.createObjectURL(blob);
   state.items.unshift(it); state.lastCat = ed.cat; state.outfitsDirty = true; state.flashId = it.id;
   await persistItem(it);
@@ -952,9 +975,135 @@ async function drawSample(shape, fill) {
 async function seedSamples() {
   for (const [name, cat, color, style, weight, shape, fill] of SAMPLES) {
     const blob = await drawSample(shape, fill);
-    const it = { id: uid(), name, cat, color, style, weight, fav: false, blob, w: 480, h: 480, added: Date.now(), lastWorn: null, sample: true };
+    const it = { id: uid(), name, cat, color, style, weight, fav: false, blob, w: 480, h: 480, added: Date.now(), lastWorn: null, sample: true, pid: state.pid };
     it.url = URL.createObjectURL(blob); state.items.push(it); await persistItem(it);
   }
+}
+
+// ---------- profiles (one closet per person, optional lock to a single profile)
+const PCOL = ['#1E6B55', '#3F6FC6', '#C23A32', '#7650A8', '#C25E1A', '#B5256B'];
+const saveMeta = (k, v) => DB.put('meta', { k, v });
+const curProf = () => state.profiles.find(p => p.id === state.pid) || state.profiles[0] || { id: 'me', name: 'Me', color: PCOL[0] };
+const initialOf = n => ([...String(n).trim()][0] || '?').toUpperCase();
+const avatar = p => `<span class="av" style="--c:${p.color}" aria-hidden="true">${esc(initialOf(p.name))}</span>`;
+const newPf = (mode, extra) => ({ mode, name: '', color: '', editId: '', err: '', ...extra });
+function renderProfileChip() {
+  const b = $('#prof-btn'); if (!b) return; const p = curProf();
+  b.innerHTML = `${avatar(p)}<span class="nm">${esc(p.name)}</span>${state.lock ? ICON_LOCK : ''}`;
+  b.setAttribute('aria-label', state.lock ? `${p.name}'s closet, locked to this device` : `${p.name}'s closet. Switch or manage profiles.`);
+}
+async function loadProfile(pid, items, outfits) {
+  for (const i of state.items) URL.revokeObjectURL(i.url);
+  items = items || await DB.all('items'); outfits = outfits || await DB.all('outfits');
+  state.pid = pid;
+  state.items = items.filter(i => (i.pid || 'me') === pid).map(i => { i.pid = pid; i.url = URL.createObjectURL(i.blob); return i; }).sort((a, b) => b.added - a.added);
+  state.outfits = outfits.filter(o => (o.pid || 'me') === pid).sort((a, b) => b.created - a.created);
+  Object.assign(state, { filter: 'all', occasion: 'any', locks: {}, current: null, alts: [], genMsg: '', genNote: '', outfitsDirty: true, flashId: null, sheetId: null, queue: [], ed: null, loading: false });
+}
+async function switchProfile(pid) {
+  await loadProfile(pid); await saveMeta('active', pid);
+  $('#scrim').hidden = true; syncAdd(); show('closet');
+}
+async function deleteProfile(id) {
+  for (const i of await DB.all('items')) if ((i.pid || 'me') === id) await DB.del('items', i.id);
+  for (const o of await DB.all('outfits')) if ((o.pid || 'me') === id) await DB.del('outfits', o.id);
+  state.profiles = state.profiles.filter(p => p.id !== id); await saveMeta('profiles', state.profiles);
+  if (state.pid === id) await switchProfile(state.profiles[0].id); else renderProfileChip();
+}
+async function hashPin(pin) {
+  try { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('closet:' + pin)); return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join(''); }
+  catch (e) { return 'plain:' + pin; }
+}
+const pfSwatches = cur => PCOL.map((c, i) => `<button type="button" class="sw" style="--c:${c}" data-act="pf-color" data-v="${c}" aria-label="Color ${i + 1}" aria-pressed="${cur === c}"></button>`).join('');
+const pinField = label => `<div class="field"><label class="lbl" for="pf-pin">${label}</label><input class="input" id="pf-pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="4" placeholder="4 digits"></div>`;
+function renderProfSheet() {
+  const pf = state.pf, cur = curProf();
+  const head = t => `<div class="sheet-head"><h2>${t}</h2><button type="button" class="btn small" data-act="pf-close">Done</button></div>`;
+  const err = pf.err ? `<p class="perr" role="alert">${esc(pf.err)}</p>` : '';
+  let h;
+  if (state.lock) {
+    h = head('Locked') + `<div class="pitem" style="cursor:default">${avatar(cur)}<b>${esc(cur.name)}'s closet</b>${ICON_LOCK}</div>
+      <p class="hint">This device only shows ${esc(cur.name)}'s closet. Enter the PIN to switch profiles or unlock it.</p>${pinField('PIN')}${err}
+      <button type="button" class="btn primary" data-act="pf-unlock">Unlock</button>`;
+  } else if (pf.mode === 'add' || pf.mode === 'edit') {
+    const ed = pf.mode === 'edit';
+    h = head(ed ? 'Edit profile' : 'New profile') + `<div class="field"><label class="lbl" for="pf-name">Name</label><input class="input" id="pf-name" type="text" maxlength="24" value="${esc(pf.name)}" placeholder="e.g. Mia" autocomplete="off"></div>
+      <div class="field"><span class="lbl">Color</span><div class="swatches">${pfSwatches(pf.color)}</div></div>${err}
+      <div class="row"><button type="button" class="btn primary" data-act="${ed ? 'pf-save' : 'pf-create'}">${ed ? 'Save' : 'Create profile'}</button><button type="button" class="btn" data-act="pf-back">Back</button></div>`
+      + (ed && state.profiles.length > 1 ? `<hr><button type="button" class="btn danger" data-act="pf-del">Delete profile and its closet</button>` : '');
+  } else if (pf.mode === 'lock') {
+    h = head('Lock this device') + `<p class="hint">Use this on a device that belongs to ${esc(cur.name)}. It opens straight to ${esc(cur.name)}'s closet and hides the other profiles until the PIN is entered. It keeps casual browsing out and is not strong security. If the PIN is forgotten, the only way back in is clearing the app's data, which erases the closet, so save a backup first.</p>
+      ${pinField('Choose a 4-digit PIN')}${err}
+      <div class="row"><button type="button" class="btn primary" data-act="pf-lock">Lock this device</button><button type="button" class="btn" data-act="pf-back">Back</button></div>`;
+  } else {
+    h = head('Profiles') + `<div class="plist">${state.profiles.map(p => `<button type="button" class="pitem" data-act="pf-switch" data-v="${p.id}" aria-current="${p.id === state.pid}">${avatar(p)}<b>${esc(p.name)}</b><span class="mono">${p.id === state.pid ? 'Current' : ''}</span></button>`).join('')}</div>
+      <div class="row"><button type="button" class="btn" data-act="pf-add">Add profile</button><button type="button" class="btn" data-act="pf-edit">Edit ${esc(cur.name)}</button></div>
+      <hr><button type="button" class="btn" data-act="pf-lockmode">Lock this device to ${esc(cur.name)}</button>`;
+  }
+  $('#psheet').innerHTML = h;
+}
+function closeProf() { if ($('#pscrim').hidden) return; $('#pscrim').hidden = true; const b = $('#prof-btn'); if (b) b.focus(); }
+const capName = () => { const n = $('#pf-name'); if (n) state.pf.name = n.value; };
+
+// ---------- backup and restore (move a closet between devices)
+const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+async function saveBackup() {
+  const items = state.items.filter(i => !i.sample);
+  if (!items.length) { toast('Add some pieces first, then save a backup.'); return; }
+  const ids = new Set(items.map(i => i.id));
+  let json;
+  try {
+    const rows = [];
+    for (const i of items) { const { url, blob, pid, ...rest } = i; rows.push({ ...rest, orig: i.orig || i.id, img: await blobToDataURL(blob) }); }
+    json = JSON.stringify({ app: 'digital-closet', v: 1, exported: Date.now(), items: rows, outfits: state.outfits.filter(o => Object.values(o.ids).every(id => ids.has(id))).map(o => ({ id: o.id, orig: o.orig || o.id, ids: o.ids, created: o.created })) });
+  } catch (e) { toast("Couldn't create the backup."); return; }
+  const stamp = new Date().toISOString().slice(0, 10), slug = curProf().name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'closet', name = `closet-backup-${slug}-${stamp}.json`;
+  for (const type of ['application/json', 'text/plain']) {
+    try {
+      const f = new File([json], name, { type });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: 'Closet backup' }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); toast('Backup saved');
+  } catch (e) { toast("Couldn't save the backup file."); }
+}
+async function restoreBackup(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); if (data.app !== 'digital-closet' || !Array.isArray(data.items)) throw new Error('bad'); }
+  catch (e) { toast("That file isn't a closet backup."); return; }
+  try {
+    if (data.items.length) {
+      const gone = state.items.filter(i => i.sample); state.items = state.items.filter(i => !i.sample);
+      for (const i of gone) { URL.revokeObjectURL(i.url); await DB.del('items', i.id); }
+      for (const o of state.outfits.slice()) if (Object.values(o.ids).some(id => gone.some(g => g.id === id))) { state.outfits = state.outfits.filter(x => x !== o); await DB.del('outfits', o.id); }
+    }
+    const keyOf = x => x.orig || x.id;
+    const haveKey = new Map(state.items.map(i => [keyOf(i), i.id])), map = {}; let added = 0;
+    for (const r of data.items) {
+      if (!r || !r.id || !r.img) continue;
+      const k = keyOf(r);
+      if (haveKey.has(k)) { map[r.id] = haveKey.get(k); continue; }
+      const blob = await (await fetch(r.img)).blob(), { img, ...rest } = r;
+      const it = { ...rest, id: uid(), orig: k, pid: state.pid, blob }; it.url = URL.createObjectURL(blob);
+      state.items.push(it); haveKey.set(k, it.id); map[r.id] = it.id; await persistItem(it); added++;
+    }
+    state.items.sort((a, b) => b.added - a.added);
+    const haveO = new Set(state.outfits.map(keyOf)); let looks = 0;
+    for (const o of data.outfits || []) {
+      if (!o || !o.id || !o.ids) continue;
+      const k = keyOf(o); if (haveO.has(k)) continue;
+      const ids = {}; let ok = true;
+      for (const [sl, id] of Object.entries(o.ids)) { if (map[id]) ids[sl] = map[id]; else ok = false; }
+      if (!ok) continue;
+      const rec = { id: uid(), orig: k, ids, created: o.created || Date.now(), pid: state.pid };
+      state.outfits.push(rec); haveO.add(k); await DB.put('outfits', rec); looks++;
+    }
+    state.outfits.sort((a, b) => b.created - a.created);
+    state.outfitsDirty = true; renderCloset();
+    toast(added || looks ? `Restored ${added} ${added === 1 ? 'piece' : 'pieces'}${looks ? ` and ${looks} ${looks === 1 ? 'look' : 'looks'}` : ''} to ${curProf().name}'s closet` : 'Everything in that backup is already here');
+  } catch (e) { toast("Couldn't restore that backup."); }
 }
 
 // ---------- events
@@ -971,6 +1120,41 @@ document.addEventListener('click', async e => {
       for (const o of state.outfits.slice()) if (Object.values(o.ids).some(id => gone.some(g => g.id === id))) { state.outfits = state.outfits.filter(x => x !== o); await DB.del('outfits', o.id); }
       state.locks = {}; state.outfitsDirty = true; renderCloset(); toast('Samples removed'); break;
     }
+    case 'prof-open': state.pf = newPf('list'); renderProfSheet(); $('#pscrim').hidden = false; $('#psheet').scrollTop = 0; $('#psheet').focus(); break;
+    case 'pf-close': closeProf(); break;
+    case 'pf-back': state.pf = newPf('list'); renderProfSheet(); break;
+    case 'pf-switch': { const p = state.profiles.find(x => x.id === v); closeProf(); if (p && p.id !== state.pid) { await switchProfile(p.id); toast(`${p.name}'s closet`); } break; }
+    case 'pf-add': state.pf = newPf('add', { color: PCOL.find(c => !state.profiles.some(p => p.color === c)) || PCOL[0] }); renderProfSheet(); $('#pf-name').focus(); break;
+    case 'pf-edit': { const p = curProf(); state.pf = newPf('edit', { name: p.name, color: p.color, editId: p.id }); renderProfSheet(); break; }
+    case 'pf-color': capName(); state.pf.color = v; renderProfSheet(); break;
+    case 'pf-create': {
+      capName(); const name = state.pf.name.trim();
+      if (!name) { state.pf.err = 'Enter a name.'; renderProfSheet(); break; }
+      if (state.profiles.some(p => p.name.toLowerCase() === name.toLowerCase())) { state.pf.err = 'Someone already has that name.'; renderProfSheet(); break; }
+      const p = { id: uid(), name, color: state.pf.color || PCOL[0] };
+      state.profiles.push(p); await saveMeta('profiles', state.profiles); closeProf(); await switchProfile(p.id); toast(`${name}'s closet is ready`); break;
+    }
+    case 'pf-save': {
+      capName(); const name = state.pf.name.trim(), p = state.profiles.find(x => x.id === state.pf.editId);
+      if (!name) { state.pf.err = 'Enter a name.'; renderProfSheet(); break; }
+      if (state.profiles.some(x => x !== p && x.name.toLowerCase() === name.toLowerCase())) { state.pf.err = 'Someone already has that name.'; renderProfSheet(); break; }
+      p.name = name; p.color = state.pf.color || p.color; await saveMeta('profiles', state.profiles);
+      state.pf = newPf('list'); renderProfSheet(); renderProfileChip(); break;
+    }
+    case 'pf-del': armDelete(el, async () => { await deleteProfile(state.pf.editId); closeProf(); toast('Profile deleted'); }); break;
+    case 'pf-lockmode': state.pf = newPf('lock'); renderProfSheet(); $('#pf-pin').focus(); break;
+    case 'pf-lock': {
+      const pin = $('#pf-pin').value.trim();
+      if (!/^\d{4}$/.test(pin)) { state.pf.err = 'Enter exactly 4 digits.'; renderProfSheet(); break; }
+      state.lock = { pid: state.pid, hash: await hashPin(pin) }; await saveMeta('lock', state.lock); closeProf(); renderProfileChip(); toast(`This device is locked to ${curProf().name}`); break;
+    }
+    case 'pf-unlock': {
+      const pin = $('#pf-pin').value.trim();
+      if ((await hashPin(pin)) !== state.lock.hash) { state.pf.err = 'That PIN is wrong.'; renderProfSheet(); $('#pf-pin').focus(); break; }
+      state.lock = null; await saveMeta('lock', null); state.pf = newPf('list'); renderProfSheet(); renderProfileChip(); toast('Unlocked'); break;
+    }
+    case 'bk-save': saveBackup(); break;
+    case 'bk-load': $('#file-bk').click(); break;
     case 'pick': $('#file-pick').click(); break;
     case 'take': $('#file-cam').click(); break;
     case 'ed-tool': if (ed) setTool(v); break;
@@ -1002,7 +1186,7 @@ document.addEventListener('click', async e => {
       const ids = Object.fromEntries(Object.entries(o.slots).map(([s, it]) => [s, it.id]));
       const key = Object.values(ids).sort().join('|');
       if (state.outfits.some(x => Object.values(x.ids).sort().join('|') === key)) { toast('That look is already saved'); break; }
-      const rec = { id: uid(), ids, created: Date.now() }; state.outfits.unshift(rec); await DB.put('outfits', rec); renderLooks(); toast('Look saved'); break;
+      const rec = { id: uid(), ids, created: Date.now(), pid: state.pid }; state.outfits.unshift(rec); await DB.put('outfits', rec); renderLooks(); toast('Look saved'); break;
     }
     case 'look-wore': {
       const o = state.outfits.find(x => x.id === el.dataset.id); if (!o) break;
@@ -1015,9 +1199,14 @@ document.addEventListener('click', async e => {
 document.addEventListener('input', e => {
   if (e.target.id === 's-name') { const it = getItem(state.sheetId); if (it) { it.name = e.target.value || 'Untitled'; clearTimeout(nameTimer); nameTimer = setTimeout(() => persistItem(it), 450); } }
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.sheetId) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#pscrim').hidden) closeProf(); else if (state.sheetId) closeSheet(); }
+  if (e.key === 'Enter' && (e.target.id === 'pf-pin' || e.target.id === 'pf-name')) { const b = $('#psheet .btn.primary'); if (b) b.click(); }
+});
 $('#scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
+$('#pscrim').addEventListener('click', e => { if (e.target.id === 'pscrim') closeProf(); });
 for (const id of ['#file-pick', '#file-cam']) $(id).addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; ingest(files); });
+$('#file-bk').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) restoreBackup(f); });
 const drop = $('#drop');
 ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
@@ -1030,9 +1219,13 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => { try { 
   await DB.open();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
   const items = await DB.all('items'), outfits = await DB.all('outfits'), meta = await DB.all('meta');
-  state.items = items.sort((a, b) => b.added - a.added).map(i => (i.url = URL.createObjectURL(i.blob), i));
-  state.outfits = outfits.sort((a, b) => b.created - a.created);
-  if (!meta.some(m => m.k === 'seeded') && !state.items.length) await seedSamples();
+  const mv = k => { const r = meta.find(x => x.k === k); return r ? r.v : null; };
+  state.profiles = mv('profiles') || [{ id: 'me', name: 'Me', color: PCOL[0] }];
+  state.lock = mv('lock');
+  if (state.lock && !state.profiles.some(p => p.id === state.lock.pid)) state.lock = null;
+  const act = state.lock ? state.lock.pid : mv('active');
+  await loadProfile(state.profiles.some(p => p.id === act) ? act : state.profiles[0].id, items, outfits);
+  if (!meta.some(x => x.k === 'seeded') && !items.length) await seedSamples();
   await DB.put('meta', { k: 'seeded', v: 1 });
   renderCloset();
 })();
