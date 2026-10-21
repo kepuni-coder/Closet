@@ -147,8 +147,10 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 @media(min-width:820px){.ed-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
 .ed-col{display:grid;gap:16px;min-width:0;align-content:start}
 .stage{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background-color:var(--chk1);background-image:conic-gradient(var(--chk2) 25%,transparent 0 50%,var(--chk2) 0 75%,transparent 0);background-size:18px 18px;touch-action:none}
-#cv{display:block;margin:0 auto;max-width:100%;max-height:62vh;width:auto;height:auto;touch-action:none;cursor:crosshair}
-.ring{position:absolute;border:2px solid var(--accent);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(255,255,255,.85)}
+.ghost-guide{position:absolute;inset:3% 8%;width:84%;height:94%;pointer-events:none;opacity:.42;z-index:0}
+.ghost-guide[hidden]{display:none}
+#cv{position:relative;z-index:1;display:block;margin:0 auto;max-width:100%;max-height:62vh;width:auto;height:auto;touch-action:none;cursor:crosshair}
+.ring{position:absolute;z-index:2;border:2px solid var(--accent);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(255,255,255,.85)}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
 .seg button{min-height:44px;border:0;background:transparent;font-weight:600;font-size:13.5px;cursor:pointer}
 .seg button+button{border-left:1px solid var(--line)}
@@ -556,10 +558,25 @@ header .tabs button{
     <div class="ed-top"><h2>Check the cut-out</h2><span class="mono" id="ed-prog"></span></div>
     <div class="ed-grid">
       <div class="ed-col">
-        <div class="stage" id="stage"><canvas id="cv" aria-label="Your photo with the background removed"></canvas><div class="ring" id="ring" hidden></div></div>
+        <div class="stage" id="stage">
+          <svg class="ghost-guide" id="ghost-guide" viewBox="0 0 240 360" aria-hidden="true" hidden>
+            <defs><linearGradient id="ghost-fill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e8cbd9"/></linearGradient></defs>
+            <g fill="url(#ghost-fill)" stroke="#bd83a2" stroke-width="2.5" stroke-linejoin="round">
+              <path d="M92 42 C92 18 148 18 148 42 L148 63 C148 78 163 84 178 92 L211 120 L193 143 L164 121 L158 157 L173 225 L151 238 L120 222 L89 238 L67 225 L82 157 L76 121 L47 143 L29 120 L62 92 C77 84 92 78 92 63 Z"/>
+              <path d="M84 236 L156 236 L167 330 L139 330 L120 271 L101 330 L73 330 Z"/>
+            </g>
+            <path d="M98 43 Q120 55 142 43 M83 103 Q120 123 157 103 M90 157 Q120 170 150 157" fill="none" stroke="#d9b3c7" stroke-width="2" stroke-dasharray="4 5"/>
+          </svg>
+          <canvas id="cv" aria-label="Your photo with the background removed"></canvas><div class="ring" id="ring" hidden></div>
+        </div>
         <p class="note" id="cut-note" role="status"></p>
       </div>
       <div class="ed-col">
+        <div class="field">
+          <span class="lbl">Product photo preview</span>
+          <button type="button" class="btn" id="btn-ghost" data-act="ed-ghost" aria-pressed="false">Show ghost mannequin guide</button>
+          <p class="hint">Adds a faint mannequin-shaped guide behind your cut-out to help you preview garment placement. It is only a guide and is not saved into the clothing photo.</p>
+        </div>
         <div class="field">
           <span class="lbl">Touch up</span>
           <div class="seg" id="tools" role="group" aria-label="Touch-up tool">
@@ -1035,6 +1052,7 @@ function mountEditor() {
   cv.width = ed.W; cv.height = ed.H; ed.ctx = cv.getContext('2d');
   $('#f-name').value = ''; $('#strength').value = ed.strength; $('#brush').value = ed.brushPx;
   $('#btn-orig').setAttribute('aria-pressed', 'false'); $('#btn-undo').disabled = true; $('#tools').classList.remove('dim');
+  $('#ghost-guide').hidden = true; $('#btn-ghost').setAttribute('aria-pressed', 'false'); $('#btn-ghost').textContent = 'Show ghost mannequin guide';
   $('#ed-prog').textContent = state.batchTotal > 1 ? `Photo ${state.batchIndex} of ${state.batchTotal}` : '';
   ed.color = detectColor(ed);
   setTool('wand'); renderEdFields(); paint(); coverageNote(ed);
@@ -1683,6 +1701,7 @@ document.addEventListener('click', async e => {
     case 'pick': $('#file-pick').click(); break;
     case 'take': $('#file-cam').click(); break;
     case 'ed-tool': if (ed) setTool(v); break;
+    case 'ed-ghost': if (ed) { const guide = $('#ghost-guide'); guide.hidden = !guide.hidden; el.setAttribute('aria-pressed', String(!guide.hidden)); el.textContent = guide.hidden ? 'Show ghost mannequin guide' : 'Hide ghost mannequin guide'; } break;
     case 'ed-undo': if (ed && ed.undo.length) { ed.alpha = ed.undo.pop(); paint(); coverageNote(ed); afterEdit(); } break;
     case 'ed-orig': if (ed) { ed.showOrig = !ed.showOrig; el.setAttribute('aria-pressed', ed.showOrig); el.textContent = ed.showOrig ? 'Show cut-out' : 'Show original'; $('#tools').classList.toggle('dim', ed.showOrig); $('#ring').hidden = true; paint(); } break;
     case 'ed-reset': if (ed) { ed.strength = 30; $('#strength').value = 30; ed.showOrig = false; $('#btn-orig').setAttribute('aria-pressed', 'false'); $('#btn-orig').textContent = 'Show original'; $('#tools').classList.remove('dim'); ed.colorTouched = false; runAuto(ed); } break;
