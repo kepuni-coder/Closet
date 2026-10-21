@@ -422,6 +422,20 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
   #view-outfits .week-day{font-size:11px!important;padding:7px 1px!important}
 }
 
+
+/* Targeted functional polish: keep planner controls discoverable */
+#view-outfits .week-planner{margin:8px 0 12px}
+#view-outfits .cher-controls{margin:8px 0}
+#view-outfits .week-saved:empty{display:none}
+#view-outfits .week-entry button{min-height:34px}
+@media(max-width:799px){
+ #view-outfits #og-board{top:82px!important}
+ #view-outfits #og-board .board{height:min(29vh,245px)!important;min-height:175px!important;max-height:245px!important}
+ #view-outfits .week-planner{padding:10px}
+ #view-outfits .week-days{grid-template-columns:repeat(7,minmax(0,1fr))}
+ #view-outfits .week-entry{gap:5px}
+}
+
 </style>
 </head>
 <body>
@@ -1290,13 +1304,10 @@ function renderOutfits() {
     <div class="field"><span class="lbl">Occasion</span><div class="chips">${OCC.map(x => chip('occ', x.id, x.label, state.occasion === x.id)).join('')}</div>
       ${state.genNote === 'noactive' && state.occasion === 'workout' ? '<p class="hint">No pieces are marked Active yet, so these are casual pieces. Set a piece to Active from the closet.</p>' : ''}</div>
     <div class="field"><span class="lbl">Weather</span><div class="chips">${WX.map(x => chip('wx', x.id, x.label, state.weather === x.id)).join('')}</div></div>
-    <div class="row"><button type="button" class="btn primary" data-act="shuffle">Shuffle outfit</button><button type="button" class="btn" data-act="save-look" ${o ? '' : 'disabled'}>Save look</button><button type="button" class="btn" data-act="save-img" ${o ? '' : 'disabled'}>Save image</button></div>
-    ${o ? `<div class="chips">${chip('labels', 'x', 'Show item names', state.labels)}</div><p class="why">${esc(explain(o))}</p>
-      <div class="field"><span class="lbl">Pieces. Tap any piece on the board to swap it, or keep one while you shuffle.</span><ul class="prows">${rows}</ul></div>
-      ${addable.length ? `<div class="field"><span class="lbl">Add to this outfit</span><div class="chips">${addable.map(sl => `<button type="button" class="chip" data-act="swap-open" data-v="${sl}">+ ${sl === 'jewelry2' ? 'More jewelry' : CAT[catOf(sl)].one}</button>`).join('')}</div></div>` : ''}` : ''}
+    <div class="row"><button type="button" class="btn primary" data-act="shuffle">${state.cherMode ? 'DRESS ME ✨' : 'Shuffle outfit'}</button><button type="button" class="btn" data-act="save-look" ${o ? '' : 'disabled'}>Save look</button><button type="button" class="btn" data-act="save-img" ${o ? '' : 'disabled'}>Save image</button></div>
     <div class="field cher-controls">
       <button type="button" class="btn ${state.cherMode ? 'primary' : ''}" data-act="cher-toggle" aria-pressed="${state.cherMode}">${state.cherMode ? '✦ Exit Cher’s Closet' : '✦ Cher’s Closet Mode'}</button>
-      ${state.cherMode ? `<p class="hint">DRESS ME: shuffle your closet into a fresh look. Tap a piece to swap it, or keep favorites locked.</p><button type="button" class="btn primary" data-act="shuffle">DRESS ME ✨</button>` : ''}
+      ${state.cherMode ? `<p class="hint">DRESS ME: shuffle your closet into a fresh look. Tap a piece to swap it, or keep favorites locked. Choose a thumbnail below to wear another generated look.</p>` : ''}
     </div>
     <div class="field week-planner">
       <span class="lbl">Weekly outfit calendar</span>
@@ -1304,7 +1315,10 @@ function renderOutfits() {
       <div class="week-days">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<button type="button" class="chip week-day" data-act="plan-day" data-v="${i}" aria-label="Plan outfit for ${d}">${d}${state.weekPlan[i] ? '<span class="week-dot">♥</span>' : ''}</button>`).join('')}</div>
       <div class="week-saved">${Object.entries(state.weekPlan).sort((a,b)=>+a[0]-+b[0]).map(([day,rec])=>`<div class="week-entry"><span><b>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][+day]}</b> · ${esc(rec.title || 'Saved outfit')}</span><button type="button" class="btn small" data-act="plan-open" data-v="${day}">Open</button><button type="button" class="btn small" data-act="plan-remove" data-v="${day}">Remove</button></div>`).join('') || '<p class="hint">Your planned outfits will appear here.</p>'}</div>
     </div>
-    ${state.alts.length ? `<div class="field"><span class="lbl">More options</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, { mini: true })}</button>`).join('')}</div></div>` : ''}`;
+    ${o ? `<div class="chips">${chip('labels', 'x', 'Show item names', state.labels)}</div><p class="why">${esc(explain(o))}</p>
+      <div class="field"><span class="lbl">Pieces. Tap any piece on the board to swap it, or keep one while you shuffle.</span><ul class="prows">${rows}</ul></div>
+      ${addable.length ? `<div class="field"><span class="lbl">Add to this outfit</span><div class="chips">${addable.map(sl => `<button type="button" class="chip" data-act="swap-open" data-v="${sl}">+ ${sl === 'jewelry2' ? 'More jewelry' : CAT[catOf(sl)].one}</button>`).join('')}</div></div>` : ''}` : ''}
+    ${state.alts.length ? `<div class="field cher-alternatives"><span class="lbl">${state.cherMode ? 'DRESS ME · Choose another look' : 'More options'}</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, { mini: true })}</button>`).join('')}</div></div>` : ''}`;
   renderLooks();
 }
 function renderLooks() {
@@ -1423,6 +1437,9 @@ async function loadProfile(pid, items, outfits) {
 }
 async function switchProfile(pid) {
   await loadProfile(pid); await saveMeta('active', pid);
+  const allMeta = await DB.all('meta');
+  const planRec = allMeta.find(x => x.k === 'weekPlan:' + pid);
+  state.weekPlan = planRec && planRec.v && typeof planRec.v === 'object' ? planRec.v : {};
   $('#scrim').hidden = true; syncAdd(); show('closet');
 }
 async function deleteProfile(id) {
@@ -1715,6 +1732,8 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => { try { 
   if (state.lock && !state.profiles.some(p => p.id === state.lock.pid)) state.lock = null;
   const act = state.lock ? state.lock.pid : mv('active');
   await loadProfile(state.profiles.some(p => p.id === act) ? act : state.profiles[0].id, items, outfits);
+  const planRec = (await DB.all('meta')).find(x => x.k === 'weekPlan:' + state.pid);
+  state.weekPlan = planRec && planRec.v && typeof planRec.v === 'object' ? planRec.v : {};
   if (!meta.some(x => x.k === 'seeded') && !items.length) await seedSamples();
   await DB.put('meta', { k: 'seeded', v: 1 });
   renderCloset();
