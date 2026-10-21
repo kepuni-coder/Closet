@@ -485,6 +485,19 @@ header .tabs button{
   letter-spacing:.02em!important;
 }
 
+
+/* Responsive layout fix: keep styling inside the stylesheet, not page text. */
+@media (max-width: 700px) {
+  .topbar { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:8px!important; padding-top:10px!important; }
+  .brand { width:100%!important; display:flex!important; flex-wrap:nowrap!important; align-items:center!important; justify-content:space-between!important; gap:8px!important; }
+  .wordmark { font-size:clamp(18px,4.7vw,26px)!important; letter-spacing:.02em!important; white-space:nowrap!important; }
+  .count { font-size:10px!important; letter-spacing:.06em!important; }
+  .tabs { width:100%!important; max-width:none!important; flex:0 0 auto!important; grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:2px!important; }
+  .tabs button { min-width:0!important; padding:10px 2px 8px!important; font-size:clamp(10px,2.3vw,13px)!important; letter-spacing:.02em!important; white-space:nowrap!important; }
+}
+#view-outfits #og-board .btitle { top:3%!important; font-size:clamp(22px,7cqw,42px)!important; line-height:1.05!important; }
+#view-outfits #og-board .bsub { top:12%!important; font-size:clamp(8px,2.3cqw,14px)!important; letter-spacing:.08em!important; line-height:1.2!important; }
+
 </style>
 </head>
 <body>
@@ -1820,18 +1833,3 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => { try { 
 
 </body>
 </html>
-
-
-/* Mobile polish: prevent header and outfit-board typography from colliding */
-@media (max-width: 600px) {
-  .topbar { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:8px!important; padding-top:10px!important; }
-  .brand { width:100%!important; display:flex!important; flex-wrap:nowrap!important; align-items:center!important; justify-content:space-between!important; gap:8px!important; }
-  .wordmark { font-size:clamp(18px,5.5vw,24px)!important; letter-spacing:.025em!important; white-space:nowrap!important; }
-  .count { font-size:10px!important; letter-spacing:.06em!important; }
-  .tabs { width:100%!important; max-width:none!important; flex:0 0 auto!important; grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:2px!important; }
-  .tabs button { min-width:0!important; padding:10px 2px 8px!important; font-size:clamp(10px,2.8vw,13px)!important; letter-spacing:.045em!important; white-space:nowrap!important; }
-  #view-outfits #og-board { top:126px!important; }
-  #view-outfits #og-board .board { min-height:190px!important; height:min(32vh,260px)!important; }
-}
-#view-outfits #og-board .btitle { top:2.5%!important; font-size:8cqw!important; line-height:1.08!important; }
-#view-outfits #og-board .bsub { top:11%!important; font-size:2.7cqw!important; letter-spacing:.12em!important; line-height:1.2!important; }
