@@ -444,6 +444,7 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
         <hr>
         <div class="field"><label class="lbl" for="f-name">Name</label><input class="input" id="f-name" type="text" maxlength="60" placeholder="e.g. Navy crew sweater" autocomplete="off"></div>
         <div class="field"><span class="lbl">Category</span><div class="chips" id="f-cat"></div></div>
+        ${subcatField(state.lastCat, '', 'f-subcat')}
         <div class="field"><span class="lbl">Color <span id="f-color-name"></span></span><div class="swatches" id="f-color"></div></div>
         <div class="field"><span class="lbl">Style</span><div class="chips" id="f-style"></div></div>
         <div class="field"><span class="lbl">Weight</span><div class="chips" id="f-weight"></div></div>
@@ -661,6 +662,12 @@ const CATS = [
   { id: 'jewelry', label: 'Jewelry', one: 'Jewelry' }, { id: 'acc', label: 'Accessories', one: 'Accessory' }
 ];
 const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
+const SUBCATS = {
+ jewelry:[{id:'earrings',label:'Earrings'},{id:'necklace',label:'Necklace'},{id:'bracelet',label:'Bracelet'},{id:'ring',label:'Ring'},{id:'anklet',label:'Anklet'},{id:'brooch',label:'Brooch'},{id:'other-jewelry',label:'Other jewelry'}],
+ acc:[{id:'hat',label:'Hat / Cap'},{id:'belt',label:'Belt'},{id:'scarf',label:'Scarf'},{id:'sunglasses',label:'Sunglasses'},{id:'hair-accessory',label:'Hair accessory'},{id:'watch',label:'Watch'},{id:'gloves',label:'Gloves'},{id:'tights',label:'Tights / Socks'},{id:'other-accessory',label:'Other accessory'}]
+};
+const subcatOptions = (cat, selected='') => !SUBCATS[cat] ? '' : `<option value="">Choose a type</option>` + SUBCATS[cat].map(o=>`<option value="${o.id}" ${selected===o.id?'selected':''}>${o.label}</option>`).join('');
+const subcatField = (cat, selected='', id='f-subcat') => `<div class="field subcat-field" id="${id}-wrap" ${SUBCATS[cat]?'':'hidden'}><label class="lbl" for="${id}">Accessory type</label><select class="input" id="${id}">${subcatOptions(cat,selected)}</select><p class="hint">Choose a specific type so your stylist can coordinate accessories correctly.</p></div>`;
 const STYLES = [{ id: 'casual', label: 'Casual', lvl: 1 }, { id: 'smart', label: 'Smart', lvl: 2 }, { id: 'dressy', label: 'Dressy', lvl: 3 }, { id: 'active', label: 'Active', lvl: 0 }];
 const LVL = Object.fromEntries(STYLES.map(s => [s.id, s.lvl]));
 const WEIGHTS = [{ id: 'light', label: 'Light' }, { id: 'mid', label: 'Mid' }, { id: 'heavy', label: 'Heavy' }];
@@ -765,7 +772,7 @@ function renderCloset() {
   $('#grid').innerHTML = list.map(i => `
     <button type="button" class="piece${state.flashId === i.id ? ' flash' : ''}" data-act="open" data-id="${i.id}" aria-label="${esc(i.name)}, ${CAT[i.cat].one}, ${COL[i.color].label}">
       <span class="piece-img"><img src="${i.url}" alt="" decoding="async">${i.fav ? `<span class="fav">${ICON_HEART}</span>` : ''}</span>
-      <span class="tag"><span class="tag-name">${esc(i.name)}</span><span class="tag-meta">${CAT[i.cat].one} · ${COL[i.color].label}</span></span>
+      <span class="tag"><span class="tag-name">${esc(i.name)}</span><span class="tag-meta">${i.subcat ? ((SUBCATS[i.cat] || []).find(s => s.id === i.subcat)?.label || CAT[i.cat].one) : CAT[i.cat].one} · ${COL[i.color].label}</span></span>
     </button>`).join('');
   if (state.flashId) { const id = state.flashId; state.flashId = null; setTimeout(() => { const b = $(`.piece[data-id="${id}"]`); if (b) b.classList.remove('flash'); }, 1800); }
 }
@@ -777,6 +784,7 @@ function sheetHTML(it) {
   <div class="sheet-img"><img src="${it.url}" alt="${esc(it.name)}"></div>
   <div class="field"><label class="lbl" for="s-name">Name</label><input class="input" id="s-name" type="text" maxlength="60" value="${esc(it.name)}" autocomplete="off"></div>
   <div class="field"><span class="lbl">Category</span><div class="chips">${chipsOf('sh-cat', CATS, it.cat)}</div></div>
+  ${subcatField(it.cat, it.subcat || '', 's-subcat')}
   <div class="field"><span class="lbl">Color <span>${COL[it.color].label}</span></span><div class="swatches">${swatches('sh-color', it.color)}</div></div>
   <div class="field"><span class="lbl">Style</span><div class="chips">${chipsOf('sh-style', STYLES, it.style)}</div></div>
   <div class="field"><span class="lbl">Weight</span><div class="chips">${chipsOf('sh-weight', WEIGHTS, it.weight)}</div></div>
@@ -856,6 +864,8 @@ function runAuto(ed) {
 function renderEdFields() {
   const ed = state.ed; if (!ed) return;
   $('#f-cat').innerHTML = chipsOf('ed-cat', CATS, ed.cat);
+  const subWrap = $('#f-subcat-wrap');
+  if (subWrap) { subWrap.hidden = !SUBCATS[ed.cat]; $('#f-subcat').innerHTML = subcatOptions(ed.cat, ed.subcat || ''); }
   $('#f-color').innerHTML = swatches('ed-color', ed.color);
   $('#f-color-name').textContent = COL[ed.color].label;
   $('#f-style').innerHTML = chipsOf('ed-style', STYLES, ed.style);
@@ -910,7 +920,7 @@ async function nextPhoto() {
   const L = makeLab(src.data, n), model = estimateBg(L, W, H), bd = bgDistance(L, n, model);
   const ed = {
     W, H, src, out: new ImageData(new Uint8ClampedArray(src.data), W, H), L, bd, strength: 30, undo: [], tool: 'wand', brushPx: 36, showOrig: false,
-    cat: state.lastCat, color: 'grey', colorTouched: false, style: 'casual', weight: DEFAULT_WEIGHT[state.lastCat], weightTouched: false, drawing: false, last: null
+    cat: state.lastCat, subcat: '', color: 'grey', colorTouched: false, style: 'casual', weight: DEFAULT_WEIGHT[state.lastCat], weightTouched: false, drawing: false, last: null
   };
   ed.alpha = autoMask(L, bd, W, H, tFromStrength(ed.strength));
   state.ed = ed; state.loading = false; mountEditor(); syncAdd();
@@ -930,7 +940,8 @@ async function edSave() {
   let blob = await toBlob(crop, 'image/webp', 0.92);
   if (!blob || blob.type !== 'image/webp') blob = await toBlob(crop, 'image/png');
   const name = $('#f-name').value.trim() || `Untitled ${CAT[ed.cat].one.toLowerCase()}`;
-  const it = { id: uid(), name, cat: ed.cat, color: ed.color, style: ed.style, weight: ed.weight, fav: false, blob, w: cw, h: ch, added: Date.now(), lastWorn: null, pid: state.pid };
+  const subcat = SUBCATS[ed.cat] ? ($('#f-subcat')?.value || '') : '';
+  const it = { id: uid(), name, cat: ed.cat, subcat, color: ed.color, style: ed.style, weight: ed.weight, fav: false, blob, w: cw, h: ch, added: Date.now(), lastWorn: null, pid: state.pid };
   it.url = URL.createObjectURL(blob);
   state.items.unshift(it); state.lastCat = ed.cat; state.outfitsDirty = true; state.flashId = it.id;
   await persistItem(it);
@@ -1084,11 +1095,15 @@ function generate({ items, occasion, weather, locks, avoid }) {
     if (shoes.length) slots.shoes = pick(shoes);
     if (outers.length && (locks.outer || Math.random() < (weather === 'cold' ? 0.95 : weather === 'mild' ? 0.35 : 0))) slots.outer = pick(outers);
     if (bags.length && (locks.bag || Math.random() < 0.65)) slots.bag = pick(bags);
+    // Choose at most one jewelry item by default. This avoids pairing multiple
+    // earrings (or other competing jewelry pieces) automatically on every board.
     if (jewels.length && (lk('jewelry') || Math.random() < 0.65)) {
       slots.jewelry = lk('jewelry') || pick(jewels);
-      const l2 = lk('jewelry2'), others = jewels.filter(j => j.id !== slots.jewelry.id);
-      if (l2) slots.jewelry2 = l2;
-      else if (others.length && Math.random() < 0.3) slots.jewelry2 = pick(others);
+    }
+    // Only include a second jewelry piece when the user explicitly locks/adds it.
+    const lockedJewelry2 = lk('jewelry2');
+    if (lockedJewelry2 && (!slots.jewelry || lockedJewelry2.id !== slots.jewelry.id)) {
+      slots.jewelry2 = lockedJewelry2;
     }
     if (accs.length && (locks.acc || Math.random() < 0.25)) slots.acc = pick(accs);
     const its = Object.values(slots), key = keyOfSlots(slots);
@@ -1500,7 +1515,9 @@ document.addEventListener('click', async e => {
     case 'sheet-close': closeSheet(); break;
     case 'sh-cat': case 'sh-color': case 'sh-style': case 'sh-weight': {
       const it = getItem(state.sheetId); if (!it) break;
+      const oldCat = it.cat;
       it[{ 'sh-cat': 'cat', 'sh-color': 'color', 'sh-style': 'style', 'sh-weight': 'weight' }[act]] = v;
+      if (act === 'sh-cat' && v !== oldCat) it.subcat = '';
       refreshSheet(); persistItem(it); break;
     }
     case 'sh-fav': { const it = getItem(state.sheetId); if (it) { it.fav = !it.fav; refreshSheet(); persistItem(it); } break; }
@@ -1567,6 +1584,10 @@ document.addEventListener('click', async e => {
     }
     case 'look-del': armDelete(el, async () => { const id = el.dataset.id; state.outfits = state.outfits.filter(x => x.id !== id); await DB.del('outfits', id); renderLooks(); }); break;
   }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'f-subcat' && state.ed) state.ed.subcat = e.target.value;
+  else if (e.target.id === 's-subcat') { const it = getItem(state.sheetId); if (it) { it.subcat = e.target.value; persistItem(it); } }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 's-name') { const it = getItem(state.sheetId); if (it) { it.name = e.target.value || 'Untitled'; clearTimeout(nameTimer); nameTimer = setTimeout(() => persistItem(it), 450); } }
