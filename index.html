@@ -965,12 +965,28 @@ function generate({ items, occasion, weather, locks, avoid }) {
   }
   const rules = occasionRules(occasion); let note = '';
   const lk = s => locks[s] ? items.find(i => i.id === locks[s]) : null;
-  const base = items.filter(i => i && i.id && i.cat);
+  // Normalize stored categories defensively. The upload form uses category IDs
+  // (e.g. "dress"), while older/imported items may store display labels ("Dress"/"Dresses").
+  const canonicalCat = value => {
+    const v = String(value || '').trim().toLowerCase();
+    const aliases = {
+      tops:'top', shirt:'top', shirts:'top', blouse:'top', blouses:'top',
+      bottoms:'bottom', pants:'bottom', trousers:'bottom', shorts:'bottom', skirt:'bottom', skirts:'bottom',
+      dresses:'dress', gown:'dress', gowns:'dress', frock:'dress',
+      outerwear:'outer', jacket:'outer', jackets:'outer', coat:'outer', coats:'outer',
+      shoe:'shoes', shoes:'shoes', sneaker:'shoes', sneakers:'shoes', boots:'shoes',
+      bags:'bag', purse:'bag', purses:'bag', handbag:'bag', handbags:'bag',
+      jewelry:'jewelry', jewellery:'jewelry', accessory:'acc', accessories:'acc'
+    };
+    return aliases[v] || v;
+  };
+  const base = items.filter(i => i && i.id && i.cat).map(i => ({...i, cat: canonicalCat(i.cat)}));
   const by = s => {
-    const locked = lk(s);
+    const lockedId = locks[s];
+    const locked = lockedId ? base.find(i => i.id === lockedId) : null;
     if (locked) return [locked];
     if (s === 'outer' && weather === 'hot') return [];
-    return base.filter(i => i.cat === s || (s === 'jewelry' && i.cat === 'jewelry'));
+    return base.filter(i => i.cat === s);
   };
   const tops = by('top'), bottoms = by('bottom'), dresses = by('dress'),
         outers = by('outer'), shoes = by('shoes'), bags = by('bag'),
@@ -986,7 +1002,7 @@ function generate({ items, occasion, weather, locks, avoid }) {
   const styleLevel = i => Number.isFinite(LVL[i.style]) ? LVL[i.style] : 1;
   for (let k = 0; k < 1200; k++) {
     const slots = {};
-    if (canDress && (!canSep || Math.random() < 0.48)) slots.dress = pick(dresses);
+    if (canDress && (!canSep || Math.random() < 0.6)) slots.dress = pick(dresses);
     else { slots.top = pick(tops); slots.bottom = pick(bottoms); }
     if (shoes.length) slots.shoes = pick(shoes);
     if (outers.length && (locks.outer || Math.random() < (weather === 'cold' ? 0.95 : weather === 'mild' ? 0.35 : 0))) slots.outer = pick(outers);
