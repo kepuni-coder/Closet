@@ -986,7 +986,7 @@ function generate({ items, occasion, weather, locks, avoid }) {
   const styleLevel = i => Number.isFinite(LVL[i.style]) ? LVL[i.style] : 1;
   for (let k = 0; k < 1200; k++) {
     const slots = {};
-    if (canDress && (!canSep || Math.random() < 0.28)) slots.dress = pick(dresses);
+    if (canDress && (!canSep || Math.random() < 0.48)) slots.dress = pick(dresses);
     else { slots.top = pick(tops); slots.bottom = pick(bottoms); }
     if (shoes.length) slots.shoes = pick(shoes);
     if (outers.length && (locks.outer || Math.random() < (weather === 'cold' ? 0.95 : weather === 'mild' ? 0.35 : 0))) slots.outer = pick(outers);
@@ -1025,7 +1025,19 @@ function generate({ items, occasion, weather, locks, avoid }) {
     [topPool[i], topPool[j]] = [topPool[j], topPool[i]];
   }
   topPool.sort((a, b) => b.score - a.score);
-  const selected = topPool.length ? topPool.slice(0, 4) : ranked.slice(0, 4);
+  let selected = topPool.length ? topPool.slice(0, 4) : ranked.slice(0, 4);
+  // If dresses are available and the user has not locked separates, always include
+  // at least one dress-based recommendation instead of letting separates dominate.
+  if (canDress && dresses.length && !lk('top') && !lk('bottom') && !selected.some(o => o.slots.dress)) {
+    const dressChoice = ranked.find(o => o.slots.dress && (!avoid || o.key !== avoid));
+    if (dressChoice) selected[selected.length ? selected.length - 1 : 0] = dressChoice;
+  }
+  // Shuffle the displayed alternatives so repeated taps don't keep presenting
+  // the exact same ordering of the highest-scoring combinations.
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
   return { outfits: selected, msg: '', note };
 }
 function explain(o) {
