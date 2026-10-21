@@ -399,6 +399,29 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
   }
 }
 
+
+/* 2026 update: weekly planner + Cher mode, matched to blush/cream/rose palette */
+.week-planner{padding:14px;background:#FFF8FB;border:1px solid #EBC7D9;border-radius:16px}
+.week-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.week-day{min-width:0;padding:8px 2px!important;text-align:center;font-size:12px!important;display:flex;flex-direction:column;align-items:center;gap:2px}
+.week-dot{font-size:10px;color:#CE5796}
+.week-saved{display:grid;gap:7px;margin-top:10px}
+.week-entry{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 10px;border:1px solid #EBC7D9;border-radius:12px;background:#FFF}
+.week-entry span{flex:1;min-width:100px;color:#633A54;font-size:13px}
+.cher-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cher-controls .hint{flex-basis:100%;margin:0}
+#view-outfits.cher-active #og-board .board{border:3px solid #D95791;box-shadow:0 0 0 5px #F8D6E7,0 8px 24px rgba(160,65,112,.18)}
+#view-outfits.cher-active #og-board .btitle{text-shadow:0 1px 0 #fff}
+@media(max-width:799px){
+  #view-outfits .og{display:flex!important;flex-direction:column!important;gap:10px!important}
+  #view-outfits #og-board{position:sticky!important;top:88px!important;z-index:20!important;width:100%!important;padding:0 0 7px!important;background:#FFF2F7!important;border-radius:0 0 16px 16px!important}
+  #view-outfits #og-board .board{width:100%!important;height:min(31vh,260px)!important;min-height:190px!important;max-height:260px!important;aspect-ratio:auto!important;border-radius:16px!important}
+  #view-outfits #og-panel{gap:10px!important;position:relative!important;z-index:1!important}
+  #view-outfits #og-panel h2{margin:2px 0 4px!important}
+  #view-outfits .week-days{gap:3px}
+  #view-outfits .week-day{font-size:11px!important;padding:7px 1px!important}
+}
+
 </style>
 </head>
 <body>
@@ -735,7 +758,7 @@ const state = {
   current: null, alts: [], genMsg: '', genNote: '', queue: [], loading: false, ed: null,
   batchTotal: 0, batchIndex: 0, sheetId: null, sheetOpener: null, lastCat: 'top', flashId: null, outfitsDirty: true,
   profiles: [], pid: 'me', lock: null, pf: { mode: 'list', name: '', color: '', editId: '', err: '' },
-  title: '', sub: '', titleEdited: false, labels: false, swapSlot: null, xurl: null
+  title: '', sub: '', titleEdited: false, labels: false, swapSlot: null, xurl: null, weekPlan: {}, cherMode: false
 };
 
 // ---------- storage (IndexedDB, with an in-memory fallback)
@@ -1251,6 +1274,7 @@ function boardHTML(slots, o = {}) {
   return `<div class="board${mini ? ' mini' : ''}">${title ? `<div class="btitle">${esc(title)}</div>` : ''}${!mini && sub ? `<div class="bsub">${esc(sub)}</div>` : ''}${s}</div>`;
 }
 function renderOutfits() {
+  const view = $('#view-outfits'); if (view) view.classList.toggle('cher-active', !!state.cherMode);
   const o = state.current;
   $('#og-board').innerHTML = o ? boardHTML(o.slots, { locks: state.locks, title: state.title, sub: state.sub, labels: state.labels })
     : `<div class="board empty-board"><p>${esc(state.genMsg || 'Add some clothes and outfits will appear here.')}</p><button type="button" class="btn primary" data-act="tab" data-v="add">Add clothes</button></div>`;
@@ -1270,6 +1294,16 @@ function renderOutfits() {
     ${o ? `<div class="chips">${chip('labels', 'x', 'Show item names', state.labels)}</div><p class="why">${esc(explain(o))}</p>
       <div class="field"><span class="lbl">Pieces. Tap any piece on the board to swap it, or keep one while you shuffle.</span><ul class="prows">${rows}</ul></div>
       ${addable.length ? `<div class="field"><span class="lbl">Add to this outfit</span><div class="chips">${addable.map(sl => `<button type="button" class="chip" data-act="swap-open" data-v="${sl}">+ ${sl === 'jewelry2' ? 'More jewelry' : CAT[catOf(sl)].one}</button>`).join('')}</div></div>` : ''}` : ''}
+    <div class="field cher-controls">
+      <button type="button" class="btn ${state.cherMode ? 'primary' : ''}" data-act="cher-toggle" aria-pressed="${state.cherMode}">${state.cherMode ? '✦ Exit Cher’s Closet' : '✦ Cher’s Closet Mode'}</button>
+      ${state.cherMode ? `<p class="hint">DRESS ME: shuffle your closet into a fresh look. Tap a piece to swap it, or keep favorites locked.</p><button type="button" class="btn primary" data-act="shuffle">DRESS ME ✨</button>` : ''}
+    </div>
+    <div class="field week-planner">
+      <span class="lbl">Weekly outfit calendar</span>
+      <p class="hint">Save today’s outfit to a day. Your plan stays on this device.</p>
+      <div class="week-days">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<button type="button" class="chip week-day" data-act="plan-day" data-v="${i}" aria-label="Plan outfit for ${d}">${d}${state.weekPlan[i] ? '<span class="week-dot">♥</span>' : ''}</button>`).join('')}</div>
+      <div class="week-saved">${Object.entries(state.weekPlan).sort((a,b)=>+a[0]-+b[0]).map(([day,rec])=>`<div class="week-entry"><span><b>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][+day]}</b> · ${esc(rec.title || 'Saved outfit')}</span><button type="button" class="btn small" data-act="plan-open" data-v="${day}">Open</button><button type="button" class="btn small" data-act="plan-remove" data-v="${day}">Remove</button></div>`).join('') || '<p class="hint">Your planned outfits will appear here.</p>'}</div>
+    </div>
     ${state.alts.length ? `<div class="field"><span class="lbl">More options</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, { mini: true })}</button>`).join('')}</div></div>` : ''}`;
   renderLooks();
 }
@@ -1580,6 +1614,23 @@ document.addEventListener('click', async e => {
       });
       break;
     }
+    case 'cher-toggle': state.cherMode = !state.cherMode; renderOutfits(); toast(state.cherMode ? 'Cher’s Closet mode on ✨' : 'Back to your everyday closet'); break;
+    case 'plan-day': {
+      if (!state.current) { toast('Shuffle an outfit first'); break; }
+      const day = String(+v), ids = Object.fromEntries(Object.entries(state.current.slots).map(([sl,it]) => [sl,it.id]));
+      state.weekPlan[day] = { ids, title: state.title || 'Outfit', savedAt: Date.now() };
+      await saveMeta('weekPlan:' + state.pid, state.weekPlan);
+      renderOutfits(); toast('Outfit added to ' + ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][+day]);
+      break;
+    }
+    case 'plan-open': {
+      const rec = state.weekPlan[+v]; if (!rec) break;
+      const slots = Object.fromEntries(Object.entries(rec.ids || {}).map(([sl,id]) => [sl,getItem(id)]).filter(([,it]) => it));
+      if (Object.keys(slots).length < 2) { toast('Some planned items are no longer in your closet'); break; }
+      state.current = { slots, key: keyOfSlots(slots), score: 0 }; state.alts = []; state.locks = {};
+      state.title = rec.title || 'Planned outfit'; state.titleEdited = true; renderOutfits(); window.scrollTo(0,0); toast('Planned outfit opened'); break;
+    }
+    case 'plan-remove': delete state.weekPlan[+v]; await saveMeta('weekPlan:' + state.pid, state.weekPlan); renderOutfits(); toast('Day cleared'); break;
     case 'labels': state.labels = !state.labels; renderOutfits(); break;
     case 'lock': { const o = state.current; if (!o || !o.slots[v]) break; if (state.locks[v]) delete state.locks[v]; else state.locks[v] = o.slots[v].id; renderOutfits(); break; }
     case 'alt': { const i = +v, a = state.alts[i]; if (a) { state.alts[i] = state.current; state.current = a; renderOutfits(); } break; }
@@ -1660,6 +1711,7 @@ if ('serviceWorker' in navigator) window.addEventListener('load', () => { try { 
   const mv = k => { const r = meta.find(x => x.k === k); return r ? r.v : null; };
   state.profiles = mv('profiles') || [{ id: 'me', name: 'Me', color: PCOL[0] }];
   state.lock = mv('lock');
+  state.weekPlan = mv('weekPlan:' + (mv('active') || 'me')) || {};
   if (state.lock && !state.profiles.some(p => p.id === state.lock.pid)) state.lock = null;
   const act = state.lock ? state.lock.pid : mv('active');
   await loadProfile(state.profiles.some(p => p.id === act) ? act : state.profiles[0].id, items, outfits);
