@@ -241,6 +241,45 @@ input,select,textarea{border-radius:14px}
   .panel .row .btn{flex:1 1 42%;min-width:135px}
   .looks-wrap{margin-top:10px}
 }
+
+/* Mobile usability patch: compact header, clear board typography, quicker outfit actions */
+:root{
+  --bg:#FFF4F8; --surface:#FFF8FB; --card:#FFFFFF; --tile:#F8E3EE;
+  --ink:#392638; --ink2:#8C7186; --line:#EBC9DC;
+  --accent:#D95791; --accent-ink:#FFFFFF; --accent-soft:#F9D9E9;
+  --mat:#F4E2D4; --brown:#854B62; --shadow:rgba(117,53,91,.16);
+}
+body{background:var(--bg);color:var(--ink)}
+.top{background:rgba(255,248,251,.97);backdrop-filter:blur(14px)}
+.topbar{padding-top:7px;gap:4px 14px;align-items:center}
+.wordmark{color:#9E3F70}
+.tabs button[aria-current="page"]{color:#B63F7A;border-bottom-color:#E56BA8}
+.btn{border-radius:14px}
+.btn.primary{background:linear-gradient(135deg,#E96FA9,#C84F91);border-color:#D95791;color:white}
+.board{border-radius:16px;box-shadow:0 5px 18px rgba(120,65,92,.10)}
+.btitle{top:2.5%;font-size:9.2cqw;line-height:1.08;white-space:normal;overflow-wrap:anywhere;max-height:8.5%;display:flex;align-items:center;justify-content:center}
+.bsub{top:11.5%;font-size:2.7cqw;line-height:1.3;white-space:normal;letter-spacing:.12em}
+@media(max-width:600px){
+  .gut{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .topbar{padding-top:5px;gap:3px 8px}
+  .brand{gap:4px 8px}
+  .wordmark{font-size:clamp(19px,5.5vw,24px);line-height:1.05}
+  .profbtn{transform:scale(.92);transform-origin:center}
+  .count{font-size:10px}
+  .tabs{margin-top:2px}
+  .tabs button{padding:9px 6px;font-size:12px}
+  .og{gap:12px}
+  .board{aspect-ratio:2/2.35;max-height:56svh;min-height:310px}
+  .panel{gap:12px}
+  .panel .row{gap:8px}
+  .panel .row .btn{flex:1 1 42%;min-width:0;min-height:48px;padding:10px 12px}
+  .chips{gap:6px}
+  .chip{min-height:35px;padding:0 10px}
+  .prows{gap:6px}
+  .prow{gap:8px;padding:5px}
+  .looks-wrap{margin-top:10px}
+}
+
 </style>
 </head>
 <body>
@@ -1338,7 +1377,19 @@ document.addEventListener('click', async e => {
     case 'sh-del': armDelete(el, () => deleteItem(state.sheetId)); break;
     case 'occ': state.occasion = v; state.locks = {}; state.titleEdited = false; regen(); break;
     case 'wx': state.weather = v; state.titleEdited = false; regen(); break;
-    case 'shuffle': regen(true); break;
+    case 'shuffle': {
+      regen(true);
+      requestAnimationFrame(() => {
+        const board = document.getElementById('og-board');
+        if (board) {
+          const header = document.querySelector('.top');
+          const offset = (header ? header.getBoundingClientRect().height : 0) + 10;
+          const y = board.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        }
+      });
+      break;
+    }
     case 'labels': state.labels = !state.labels; renderOutfits(); break;
     case 'lock': { const o = state.current; if (!o || !o.slots[v]) break; if (state.locks[v]) delete state.locks[v]; else state.locks[v] = o.slots[v].id; renderOutfits(); break; }
     case 'alt': { const i = +v, a = state.alts[i]; if (a) { state.alts[i] = state.current; state.current = a; renderOutfits(); } break; }
