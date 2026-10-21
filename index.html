@@ -280,6 +280,83 @@ body{background:var(--bg);color:var(--ink)}
   .looks-wrap{margin-top:10px}
 }
 
+
+/* Full-app feminine 2026 palette: remove dark green/teal throughout */
+:root{
+  color-scheme:light;
+  --bg:#FFF2F7;
+  --surface:#FFF8FB;
+  --card:#FFFFFF;
+  --tile:#FBE5EF;
+  --ink:#512B43;
+  --ink2:#9A748B;
+  --line:#EBC7D9;
+  --accent:#D95791;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#F8D6E7;
+  --danger:#B63E66;
+  --danger-soft:#FCE0EA;
+  --mat:#F4E5D8;
+  --mat-line:rgba(255,255,255,.76);
+  --mat-line-strong:rgba(255,255,255,.98);
+  --chk1:#FFF9FC;
+  --chk2:#F6E4EE;
+  --shadow:rgba(130,64,100,.14);
+  --linen:#F7EBDD;
+  --brown:#854B62;
+}
+html,body{background:#FFF2F7!important;color:#512B43!important;color-scheme:light}
+body::before{background:#FFF8FB!important}
+.top,.topbar,.tabs,.nav,.header,.app-header{
+  background:rgba(255,248,251,.97)!important;
+  color:#512B43!important;
+  border-color:#EBC7D9!important;
+}
+.wordmark,.brand,.top .title{color:#A63F76!important}
+.tabs button{color:#A18497!important}
+.tabs button[aria-current="page"],.tabs button.active,.tabs .active{
+  color:#B63F7A!important;border-color:#E56BA8!important
+}
+.panel,.card,.tile,.prow,.item-row,.modal,.dialog,.field-card,.surface{
+  background:#FFF9FC!important;color:#512B43!important;border-color:#EBC7D9!important
+}
+input,select,textarea{
+  background:#FFFFFF!important;color:#512B43!important;border-color:#EBC7D9!important
+}
+button,.btn,.chip{
+  color:#633A54;
+  border-color:#EBC7D9;
+}
+.btn:not(.primary),.chip,.tabs button:not([aria-current="page"]){
+  background:#FBE8F1;
+}
+.btn.primary,.primary,[data-act="shuffle"]{
+  background:linear-gradient(135deg,#EB80B3,#CE5796)!important;
+  color:#FFFFFF!important;border-color:#D95791!important;
+}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid #E77DB0!important;outline-offset:2px
+}
+.lbl,.label,.muted,.hint,.count,.subtle{color:#9A748B}
+.board,.alt,.preview,.image-card{
+  border-color:#EBC7D9!important;box-shadow:0 5px 18px rgba(130,64,100,.10)
+}
+.btitle{color:#854B62!important}
+.why{color:#70465E!important}
+hr,.divider{border-color:#EBC7D9!important}
+
+
+/* Ensure remaining app sections, drawers and controls match the light theme */
+main,section,article,aside,footer,.wrap,.content,.view,.settings,.list,.looks-wrap{
+  color:#512B43;
+}
+button:disabled{opacity:.48}
+.prow img,.prow .thumb,.thumb{background:#F7E7EF!important}
+.alt{background:#FFF9FC!important}
+dialog,[role="dialog"],.popover,.dropdown,.menu{
+  background:#FFF8FB!important;color:#512B43!important;border-color:#EBC7D9!important
+}
+
 </style>
 </head>
 <body>
