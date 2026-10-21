@@ -958,49 +958,75 @@ function occasionRules(o) {
 }
 const pick = a => a[Math.floor(Math.random() * a.length)];
 function generate({ items, occasion, weather, locks, avoid }) {
-  for (const k of Object.keys(locks)) if (!items.some(i => i.id === locks[k])) delete locks[k];
+  // Do not permanently narrow the closet to the selected style level.
+  // Use occasion/style as a scoring preference so every eligible garment can participate.
+  for (const k of Object.keys(locks)) {
+    if (!items.some(i => i.id === locks[k])) delete locks[k];
+  }
   const rules = occasionRules(occasion); let note = '';
-  let pool = items.filter(i => rules.allow.includes(LVL[i.style]));
-  if (occasion === 'workout' && !pool.length) { pool = items.filter(i => LVL[i.style] === 1); note = 'noactive'; }
   const lk = s => locks[s] ? items.find(i => i.id === locks[s]) : null;
-  const by = s => { const l = lk(s); if (l) return [l]; if (s === 'outer' && weather === 'hot') return []; return pool.filter(i => i.cat === s); };
-  const tops = by('top'), bottoms = by('bottom'), dresses = by('dress'), outers = by('outer'), shoes = by('shoes'), bags = by('bag'), accs = by('acc');
-  const jewels = pool.filter(i => i.cat === 'jewelry');
+  const base = items.filter(i => i && i.id && i.cat);
+  const by = s => {
+    const locked = lk(s);
+    if (locked) return [locked];
+    if (s === 'outer' && weather === 'hot') return [];
+    return base.filter(i => i.cat === s || (s === 'jewelry' && i.cat === 'jewelry'));
+  };
+  const tops = by('top'), bottoms = by('bottom'), dresses = by('dress'),
+        outers = by('outer'), shoes = by('shoes'), bags = by('bag'),
+        accs = by('acc'), jewels = by('jewelry');
   const canSep = tops.length && bottoms.length && !lk('dress');
   const canDress = dresses.length && !lk('top') && !lk('bottom');
   if (!canSep && !canDress) {
-    const msg = !items.length ? 'Add some clothes and outfits will appear here.' : !pool.length ? 'No pieces match that occasion yet. Try Anything.' : 'Add at least one top and one bottom, or a dress, to build outfits.';
+    const msg = !items.length ? 'Add some clothes and outfits will appear here.' :
+      'Add a top and bottom, or a dress, to build outfits. Check each item’s category if it should be included.';
     return { outfits: [], msg, note };
   }
   const cand = new Map();
-  for (let k = 0; k < 600; k++) {
+  const styleLevel = i => Number.isFinite(LVL[i.style]) ? LVL[i.style] : 1;
+  for (let k = 0; k < 1200; k++) {
     const slots = {};
-    if (canDress && (!canSep || Math.random() < 0.28)) slots.dress = pick(dresses); else { slots.top = pick(tops); slots.bottom = pick(bottoms); }
+    if (canDress && (!canSep || Math.random() < 0.28)) slots.dress = pick(dresses);
+    else { slots.top = pick(tops); slots.bottom = pick(bottoms); }
     if (shoes.length) slots.shoes = pick(shoes);
     if (outers.length && (locks.outer || Math.random() < (weather === 'cold' ? 0.95 : weather === 'mild' ? 0.35 : 0))) slots.outer = pick(outers);
-    if (bags.length && (locks.bag || Math.random() < 0.75)) slots.bag = pick(bags);
-    if (jewels.length && (lk('jewelry') || Math.random() < 0.8)) {
+    if (bags.length && (locks.bag || Math.random() < 0.65)) slots.bag = pick(bags);
+    if (jewels.length && (lk('jewelry') || Math.random() < 0.65)) {
       slots.jewelry = lk('jewelry') || pick(jewels);
       const l2 = lk('jewelry2'), others = jewels.filter(j => j.id !== slots.jewelry.id);
-      if (l2) slots.jewelry2 = l2; else if (others.length && Math.random() < 0.4) slots.jewelry2 = pick(others);
+      if (l2) slots.jewelry2 = l2;
+      else if (others.length && Math.random() < 0.3) slots.jewelry2 = pick(others);
     }
-    if (accs.length && (locks.acc || Math.random() < 0.3)) slots.acc = pick(accs);
+    if (accs.length && (locks.acc || Math.random() < 0.25)) slots.acc = pick(accs);
     const its = Object.values(slots), key = keyOfSlots(slots);
     if (cand.has(key)) continue;
-    let s = colorScore(its.map(i => i.color));
-    const lv = Object.entries(slots).filter(([sl]) => CORE.includes(sl)).map(([, i]) => LVL[i.style]);
-    s -= rules.target !== null ? lv.reduce((t, l) => t + Math.abs(l - rules.target), 0) * 0.9 : (Math.max(...lv) - Math.min(...lv)) * 1.6;
+    let score = colorScore(its.map(i => i.color));
+    const lv = Object.entries(slots).filter(([sl]) => CORE.includes(sl)).map(([, i]) => styleLevel(i));
+    score -= rules.target !== null ? lv.reduce((t, l) => t + Math.abs(l - rules.target), 0) * 0.55 :
+      (Math.max(...lv) - Math.min(...lv)) * 0.9;
     for (const i of its) {
-      if (!NOWX.includes(i.cat)) s += WF[weather][i.weight];
-      if (i.fav) s += 0.35;
-      const dd = daysSince(i.lastWorn); if (dd !== null) s -= dd < 1 ? 2.2 : dd < 3 ? 1.1 : 0;
+      if (!NOWX.includes(i.cat)) score += (WF[weather] && WF[weather][i.weight]) || 0;
+      if (i.fav) score += 0.35;
+      const dd = daysSince(i.lastWorn);
+      if (dd !== null) score -= dd < 1 ? 1.5 : dd < 3 ? 0.7 : 0;
     }
-    if (slots.bag && slots.shoes && slots.bag.color === slots.shoes.color) s += 0.4;
-    if (weather === 'cold' && outers.length && !slots.outer) s -= 2.5;
-    if (avoid && key === avoid) s -= 3;
-    cand.set(key, { slots, key, score: s + Math.random() * 0.8 });
+    if (slots.bag && slots.shoes && slots.bag.color === slots.shoes.color) score += 0.4;
+    if (weather === 'cold' && outers.length && !slots.outer) score -= 1.8;
+    if (avoid && key === avoid) score -= 8;
+    cand.set(key, { slots, key, score: score + Math.random() * 0.55 });
   }
-  return { outfits: [...cand.values()].sort((a, b) => b.score - a.score).slice(0, 4), msg: '', note };
+  let ranked = [...cand.values()].sort((a, b) => b.score - a.score);
+  // Prefer a genuinely different outfit on shuffle if alternatives exist.
+  if (avoid && ranked.some(o => o.key !== avoid)) ranked = ranked.filter(o => o.key !== avoid);
+  // Select from a small high-quality pool instead of always returning the single top-ranked outfit.
+  const topPool = ranked.slice(0, Math.min(24, ranked.length));
+  for (let i = topPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [topPool[i], topPool[j]] = [topPool[j], topPool[i]];
+  }
+  topPool.sort((a, b) => b.score - a.score);
+  const selected = topPool.length ? topPool.slice(0, 4) : ranked.slice(0, 4);
+  return { outfits: selected, msg: '', note };
 }
 function explain(o) {
   const cols = [...new Set(Object.values(o.slots).map(i => i.color))], nn = cols.filter(c => !COL[c].neutral), nu = cols.filter(c => COL[c].neutral);
