@@ -17,6 +17,77 @@
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
+
+/* 2026 coquette closet refresh: blush, cherry, lilac, butter and playful print details */
+:root{
+  --bg:#FFF7FA; --surface:#FFFDFE; --card:#FFFFFF; --tile:#F8EAF1;
+  --ink:#382536; --ink2:#8D7187; --line:#EAD4E2;
+  --accent:#E85D9E; --accent-ink:#FFFFFF; --accent-soft:#FCE0ED;
+  --mat:#F7E7EF; --mat-line:rgba(255,255,255,.7); --mat-line-strong:#FFFFFF;
+  --chk1:#FFF9FC; --chk2:#F8EAF1; --shadow:rgba(86,38,69,.18);
+  --linen:#FFF0E6; --brown:#80405F;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#211923; --surface:#2B202D; --card:#342638; --tile:#443146;
+    --ink:#FFF1F8; --ink2:#C7AABD; --line:#594154;
+    --accent:#FF82BC; --accent-ink:#38182C; --accent-soft:#4A2D40;
+    --mat:#382838; --mat-line:rgba(255,255,255,.08); --mat-line-strong:rgba(255,255,255,.35);
+    --chk1:#3A2C3B; --chk2:#2D2230; --shadow:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#211923; --surface:#2B202D; --card:#342638; --tile:#443146;
+  --ink:#FFF1F8; --ink2:#C7AABD; --line:#594154;
+  --accent:#FF82BC; --accent-ink:#38182C; --accent-soft:#4A2D40;
+  --mat:#382838; --mat-line:rgba(255,255,255,.08); --mat-line-strong:rgba(255,255,255,.35);
+  --chk1:#3A2C3B; --chk2:#2D2230; --shadow:rgba(0,0,0,.45); color-scheme:dark;
+}
+body{background-image:radial-gradient(ellipse at 8% 0%,rgba(255,190,220,.22),transparent 35%),radial-gradient(ellipse at 100% 18%,rgba(222,205,255,.17),transparent 28%)}
+.top{box-shadow:0 4px 20px rgba(110,53,88,.06)}
+.wordmark{letter-spacing:.035em}
+.btn,.chip,.input,.pitem,.opt,.alt,.profbtn{border-radius:14px}
+.btn.primary{box-shadow:0 5px 0 rgba(155,58,111,.12)}
+.chip[aria-pressed="true"]{box-shadow:0 3px 0 rgba(155,58,111,.12)}
+.piece,.prow{border-radius:14px}
+.piece-img,.oimg{background:linear-gradient(145deg,var(--tile),var(--surface))}
+.board{border-radius:18px;border:1px solid rgba(224,173,202,.7);background-color:#fff8f1;background-image:radial-gradient(120% 90% at 50% 38%,transparent 58%,rgba(120,65,87,.12) 100%),linear-gradient(90deg,rgba(125,91,56,.035) 1px,transparent 1px),linear-gradient(rgba(125,91,56,.025) 1px,transparent 1px),var(--noise);box-shadow:0 12px 30px rgba(106,56,83,.13)}
+.board:not(.mini)::before{content:"♡  ✧";color:#C44D86}
+.board:not(.mini)::after{content:"✿  ♡";color:#C44D86}
+.btitle{color:#80405F}
+.bsub{color:#9A5C7A}
+.slot .cap{color:#80405F}
+.btn:active,.chip:active{transform:translateY(1px)}
+/* Mobile styling workspace: less wasted board space and actions stay easy to reach */
+@media(max-width:799px){
+  main{padding-block:12px}
+  section[id^="view-"]{gap:14px}
+  .og{gap:14px}
+  .board{aspect-ratio:4/5;max-height:66svh}
+  #og-board{min-width:0}
+  #og-panel{gap:12px}
+  #og-panel>.field{gap:7px}
+  #og-panel>.field:first-child .chips{gap:6px}
+  #og-panel .row{display:grid;grid-template-columns:1.2fr 1fr;gap:8px}
+  #og-panel .row .btn{min-width:0;padding-inline:10px}
+  #og-panel .row [data-act="save-img"]{grid-column:1/-1}
+  #og-panel>.field:has(.prows),
+  #og-panel>.field:has(.alts){padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+  .looks-wrap{margin-top:2px;padding-top:14px}
+  .alts{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .optgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:420px){
+  .wordmark{font-size:21px}
+  .board{aspect-ratio:4/5}
+  .btitle{font-size:9.2cqw}
+  .bsub{font-size:2.8cqw}
+  .slot .cap{font-size:3.1cqw}
+  .chips{gap:6px}
+  .chip{padding-inline:10px}
+}
+
 </style>
 <title>My Digital Closet</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..900&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Kaushan+Script&display=swap">
