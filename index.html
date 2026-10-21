@@ -436,6 +436,31 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
  #view-outfits .week-entry{gap:5px}
 }
 
+
+/* Dedicated top-level Planner tab: weekly calendar + Cher's Closet */
+.planner-hero{padding:18px 4px 10px}
+.planner-hero h2{margin:4px 0 8px;font-size:clamp(25px,5vw,34px);color:#854B62}
+.eyebrow{display:block;color:#A36E8A;font-size:11px;letter-spacing:.16em;font-weight:800}
+.planner-card{margin:12px 0;padding:16px;border:1px solid #EBC7D9;border-radius:20px;background:linear-gradient(145deg,#FFF9FC,#FBEAF2);box-shadow:0 6px 20px rgba(130,64,100,.08)}
+.planner-card h3{margin:4px 0;color:#633A54;font-size:22px}
+.planner-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cher-heart,.planner-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#F6D7E6;color:#C64F91;font-size:26px;flex-shrink:0}
+.planner-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cher-on{padding:10px 12px;border-radius:12px;background:#F8DDEB;color:#78415F}
+.planner-week-days{margin:14px 0}
+.planner-week-days .week-day{min-height:58px;background:#FFF!important;border-color:#EBC7D9!important;color:#633A54!important}
+.planner-week-days .week-day:disabled{opacity:.4}
+.week-entry span{display:flex;flex-direction:column;gap:2px}
+.week-entry small{font-size:12px;color:#9A748B}
+.tabs{overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+@media(max-width:799px){
+ .tabs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .tabs button{min-width:0!important;padding:12px 3px!important;font-size:12px!important;white-space:nowrap}
+ .planner-card{padding:13px}
+ .planner-actions .btn{flex:1 1 auto}
+}
+
 </style>
 </head>
 <body>
@@ -446,6 +471,7 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
     <button type="button" data-act="tab" data-v="closet" aria-current="page">Closet</button>
     <button type="button" data-act="tab" data-v="add" aria-current="false">Add</button>
     <button type="button" data-act="tab" data-v="outfits" aria-current="false">Outfits</button>
+    <button type="button" data-act="tab" data-v="planner" aria-current="false">Planner</button>
   </nav>
 </div></div></header>
 
@@ -547,6 +573,15 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
     <h2>Saved looks</h2>
     <div id="looks"></div>
   </div>
+</section>
+
+<section id="view-planner" hidden>
+  <div class="planner-hero">
+    <p class="eyebrow">YOUR STYLE, YOUR WEEK</p>
+    <h2>Outfit Planner <span aria-hidden="true">♡</span></h2>
+    <p class="hint">Plan your looks for the week, or let Cher inspire a new combination.</p>
+  </div>
+  <div id="planner-panel"></div>
 </section>
 
 </div></main>
@@ -828,9 +863,10 @@ const toBlob = (cv, type, q) => new Promise(r => cv.toBlob(r, type, q));
 // ---------- views
 function show(view) {
   state.view = view;
-  for (const v of ['closet', 'add', 'outfits']) $('#view-' + v).hidden = v !== view;
+  for (const v of ['closet', 'add', 'outfits', 'planner']) $('#view-' + v).hidden = v !== view;
   $$('.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.v === view ? 'page' : 'false'));
   if (view === 'outfits') { if (state.outfitsDirty || !state.current) regen(); else renderOutfits(); }
+  if (view === 'planner') renderPlanner();
   if (view === 'closet') renderCloset();
   window.scrollTo(0, 0);
 }
@@ -1287,6 +1323,33 @@ function boardHTML(slots, o = {}) {
   }
   return `<div class="board${mini ? ' mini' : ''}">${title ? `<div class="btitle">${esc(title)}</div>` : ''}${!mini && sub ? `<div class="bsub">${esc(sub)}</div>` : ''}${s}</div>`;
 }
+function renderPlanner() {
+  const root = $('#planner-panel');
+  if (!root) return;
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const hasOutfit = !!state.current;
+  root.innerHTML = `
+    <section class="planner-card cher-card">
+      <div class="planner-card-head">
+        <div><span class="eyebrow">THE ICONIC DRESS-UP GAME</span><h3>Cher’s Closet</h3></div>
+        <span class="cher-heart" aria-hidden="true">♡</span>
+      </div>
+      <p class="hint">Mix and match pieces from your own closet. DRESS ME creates another outfit using your current occasion and weather settings.</p>
+      <div class="row planner-actions">
+        <button type="button" class="btn primary" data-act="cher-toggle" aria-pressed="${state.cherMode}">${state.cherMode ? '✓ Cher mode is on' : 'Turn on Cher mode'}</button>
+        <button type="button" class="btn" data-act="planner-dress" ${state.items.length < 2 ? 'disabled' : ''}>DRESS ME ✨</button>
+        <button type="button" class="btn" data-act="tab" data-v="outfits">View outfit board</button>
+      </div>
+      ${state.cherMode ? `<p class="hint cher-on">♡ Cher mode is on. Use DRESS ME to generate a fresh look, then visit Outfits to keep or swap individual pieces.</p>` : ''}
+    </section>
+    <section class="planner-card">
+      <div class="planner-card-head"><div><span class="eyebrow">MONDAY TO SUNDAY</span><h3>Weekly Outfit Calendar</h3></div><span class="planner-icon" aria-hidden="true">✿</span></div>
+      <p class="hint">${hasOutfit ? `Current look: <strong>${esc(state.title || 'Fresh outfit')}</strong>. Choose a day to save it to your week.` : 'Generate an outfit in the Outfits tab first, then return here to assign it to a day.'}</p>
+      <div class="week-days planner-week-days">${days.map((d,i)=>`<button type="button" class="chip week-day" data-act="plan-day" data-v="${i}" ${hasOutfit ? '' : 'disabled'} aria-label="Save current outfit to ${d}"><span>${d.slice(0,3)}</span>${state.weekPlan[i] ? '<span class="week-dot">♥</span>' : ''}</button>`).join('')}</div>
+      <div class="week-saved">${Object.entries(state.weekPlan).sort((a,b)=>+a[0]-+b[0]).map(([day,rec])=>`<div class="week-entry"><span><b>${days[+day]}</b><small>${esc(rec.title || 'Saved outfit')}</small></span><button type="button" class="btn small" data-act="plan-open" data-v="${day}">Open look</button><button type="button" class="btn small" data-act="plan-remove" data-v="${day}">Clear</button></div>`).join('') || '<p class="hint">Your week is waiting for its first outfit. Save a look to any day above.</p>'}</div>
+    </section>`;
+}
+
 function renderOutfits() {
   const view = $('#view-outfits'); if (view) view.classList.toggle('cher-active', !!state.cherMode);
   const o = state.current;
@@ -1305,19 +1368,6 @@ function renderOutfits() {
       ${state.genNote === 'noactive' && state.occasion === 'workout' ? '<p class="hint">No pieces are marked Active yet, so these are casual pieces. Set a piece to Active from the closet.</p>' : ''}</div>
     <div class="field"><span class="lbl">Weather</span><div class="chips">${WX.map(x => chip('wx', x.id, x.label, state.weather === x.id)).join('')}</div></div>
     <div class="row"><button type="button" class="btn primary" data-act="shuffle">${state.cherMode ? 'DRESS ME ✨' : 'Shuffle outfit'}</button><button type="button" class="btn" data-act="save-look" ${o ? '' : 'disabled'}>Save look</button><button type="button" class="btn" data-act="save-img" ${o ? '' : 'disabled'}>Save image</button></div>
-    <div class="field cher-controls">
-      <button type="button" class="btn ${state.cherMode ? 'primary' : ''}" data-act="cher-toggle" aria-pressed="${state.cherMode}">${state.cherMode ? '✦ Exit Cher’s Closet' : '✦ Cher’s Closet Mode'}</button>
-      ${state.cherMode ? `<p class="hint">DRESS ME: shuffle your closet into a fresh look. Tap a piece to swap it, or keep favorites locked. Choose a thumbnail below to wear another generated look.</p>` : ''}
-    </div>
-    <div class="field week-planner">
-      <span class="lbl">Weekly outfit calendar</span>
-      <p class="hint">Save today’s outfit to a day. Your plan stays on this device.</p>
-      <div class="week-days">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<button type="button" class="chip week-day" data-act="plan-day" data-v="${i}" aria-label="Plan outfit for ${d}">${d}${state.weekPlan[i] ? '<span class="week-dot">♥</span>' : ''}</button>`).join('')}</div>
-      <div class="week-saved">${Object.entries(state.weekPlan).sort((a,b)=>+a[0]-+b[0]).map(([day,rec])=>`<div class="week-entry"><span><b>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][+day]}</b> · ${esc(rec.title || 'Saved outfit')}</span><button type="button" class="btn small" data-act="plan-open" data-v="${day}">Open</button><button type="button" class="btn small" data-act="plan-remove" data-v="${day}">Remove</button></div>`).join('') || '<p class="hint">Your planned outfits will appear here.</p>'}</div>
-    </div>
-    ${o ? `<div class="chips">${chip('labels', 'x', 'Show item names', state.labels)}</div><p class="why">${esc(explain(o))}</p>
-      <div class="field"><span class="lbl">Pieces. Tap any piece on the board to swap it, or keep one while you shuffle.</span><ul class="prows">${rows}</ul></div>
-      ${addable.length ? `<div class="field"><span class="lbl">Add to this outfit</span><div class="chips">${addable.map(sl => `<button type="button" class="chip" data-act="swap-open" data-v="${sl}">+ ${sl === 'jewelry2' ? 'More jewelry' : CAT[catOf(sl)].one}</button>`).join('')}</div></div>` : ''}` : ''}
     ${state.alts.length ? `<div class="field cher-alternatives"><span class="lbl">${state.cherMode ? 'DRESS ME · Choose another look' : 'More options'}</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, { mini: true })}</button>`).join('')}</div></div>` : ''}`;
   renderLooks();
 }
@@ -1631,13 +1681,16 @@ document.addEventListener('click', async e => {
       });
       break;
     }
-    case 'cher-toggle': state.cherMode = !state.cherMode; renderOutfits(); toast(state.cherMode ? 'Cher’s Closet mode on ✨' : 'Back to your everyday closet'); break;
+    case 'cher-toggle': state.cherMode = !state.cherMode; renderPlanner(); toast(state.cherMode ? 'Cher’s Closet mode on ✨' : 'Back to your everyday closet'); break;
+    case 'planner-dress':
+      state.occasion = 'any'; state.locks = {};
+      regen(true); show('outfits'); toast('DRESS ME created a fresh look ✨'); break;
     case 'plan-day': {
       if (!state.current) { toast('Shuffle an outfit first'); break; }
       const day = String(+v), ids = Object.fromEntries(Object.entries(state.current.slots).map(([sl,it]) => [sl,it.id]));
       state.weekPlan[day] = { ids, title: state.title || 'Outfit', savedAt: Date.now() };
       await saveMeta('weekPlan:' + state.pid, state.weekPlan);
-      renderOutfits(); toast('Outfit added to ' + ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][+day]);
+      renderPlanner(); toast('Outfit added to ' + ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][+day]);
       break;
     }
     case 'plan-open': {
@@ -1645,9 +1698,9 @@ document.addEventListener('click', async e => {
       const slots = Object.fromEntries(Object.entries(rec.ids || {}).map(([sl,id]) => [sl,getItem(id)]).filter(([,it]) => it));
       if (Object.keys(slots).length < 2) { toast('Some planned items are no longer in your closet'); break; }
       state.current = { slots, key: keyOfSlots(slots), score: 0 }; state.alts = []; state.locks = {};
-      state.title = rec.title || 'Planned outfit'; state.titleEdited = true; renderOutfits(); window.scrollTo(0,0); toast('Planned outfit opened'); break;
+      state.title = rec.title || 'Planned outfit'; state.titleEdited = true; show('outfits'); window.scrollTo(0,0); toast('Planned outfit opened'); break;
     }
-    case 'plan-remove': delete state.weekPlan[+v]; await saveMeta('weekPlan:' + state.pid, state.weekPlan); renderOutfits(); toast('Day cleared'); break;
+    case 'plan-remove': delete state.weekPlan[+v]; await saveMeta('weekPlan:' + state.pid, state.weekPlan); renderPlanner(); toast('Day cleared'); break;
     case 'labels': state.labels = !state.labels; renderOutfits(); break;
     case 'lock': { const o = state.current; if (!o || !o.slots[v]) break; if (state.locks[v]) delete state.locks[v]; else state.locks[v] = o.slots[v].id; renderOutfits(); break; }
     case 'alt': { const i = +v, a = state.alts[i]; if (a) { state.alts[i] = state.current; state.current = a; renderOutfits(); } break; }
