@@ -158,7 +158,12 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 /* outfits */
 .og{display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:800px){.og{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
-.board{position:relative;aspect-ratio:2/3;border-radius:6px;overflow:hidden;container-type:inline-size;background-color:var(--linen);background-image:radial-gradient(120% 90% at 50% 38%,transparent 58%,rgba(90,65,30,.16) 100%),var(--noise)}
+.board{position:relative;aspect-ratio:2/3;border-radius:5px;overflow:hidden;container-type:inline-size;background-color:#f5efe3;background-image:radial-gradient(120% 90% at 50% 38%,transparent 58%,rgba(90,65,30,.12) 100%),linear-gradient(90deg,rgba(125,91,56,.035) 1px,transparent 1px),linear-gradient(rgba(125,91,56,.025) 1px,transparent 1px),var(--noise);background-size:auto,7px 7px,7px 7px,auto;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.board:not(.mini)::before{content:"♡";position:absolute;left:4%;top:3.5%;font-family:serif;font-size:8cqw;color:var(--brown);opacity:.75;transform:rotate(-18deg);pointer-events:none;z-index:4}
+.board:not(.mini)::after{content:"♧";position:absolute;right:4%;top:3.4%;font-family:serif;font-size:7cqw;color:var(--brown);opacity:.65;transform:rotate(14deg);pointer-events:none;z-index:4}
+.board:not(.mini) .btitle{text-shadow:0 1px 0 rgba(255,255,255,.35);letter-spacing:-.025em}
+.board:not(.mini) .bsub{letter-spacing:.16em;font-size:3cqw}
+.board:not(.mini) .slot .cap{background:rgba(248,242,231,.78);border-radius:2px;padding:0 .8cqw;text-shadow:0 1px rgba(255,255,255,.6)}
 .btitle{position:absolute;left:4%;right:4%;top:2.2%;text-align:center;color:var(--brown);font-family:var(--f-script);font-size:26px;font-size:10.4cqw;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bsub{position:absolute;left:4%;right:4%;top:8.6%;text-align:center;color:var(--brown);opacity:.85;font-family:var(--f-body);font-weight:500;font-size:11px;font-size:3.1cqw;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden}
 .mini .btitle{font-size:13px;font-size:8.6cqw}
@@ -444,7 +449,9 @@ function keepMain(mask, W, H) {
     }
     areas.push(a); if (a > max) max = a;
   }
-  const keepMin = Math.max(max * 0.06, n * 0.002);
+  // Keep smaller disconnected garment details (laces, straps, cuffs, loose sleeves)
+  // instead of treating every small component as background noise.
+  const keepMin = Math.max(max * 0.008, n * 0.00015);
   for (let i = 0; i < n; i++) if (mask[i] && areas[lab[i]] < keepMin) mask[i] = 0;
 }
 function blurBox(a, W, H, r) {
@@ -466,11 +473,12 @@ function refine(mask, W, H) { // shrink 1px to drop the background fringe, then 
     const i = y * W + x;
     if (!mask[i]) continue;
     const l = x > 0 ? mask[i - 1] : 255, r = x < W - 1 ? mask[i + 1] : 255, u = y > 0 ? mask[i - W] : 255, d = y < H - 1 ? mask[i + W] : 255;
-    e[i] = (l && r && u && d) ? 1 : 0;
+    // Avoid a full 4-neighbour erosion: it can eat thin straps, laces and hems.
+    e[i] = ((!!l + !!r + !!u + !!d) >= 2) ? 1 : 0;
   }
-  blurBox(e, W, H, 1); blurBox(e, W, H, 1);
+  blurBox(e, W, H, 1);
   const out = new Uint8Array(n);
-  for (let i = 0; i < n; i++) { let v = (e[i] - 0.3) / 0.4; v = v < 0 ? 0 : v > 1 ? 1 : v; out[i] = Math.round(v * v * (3 - 2 * v) * 255); }
+  for (let i = 0; i < n; i++) { let v = (e[i] - 0.22) / 0.48; v = v < 0 ? 0 : v > 1 ? 1 : v; out[i] = Math.round(v * v * (3 - 2 * v) * 255); }
   return out;
 }
 function softRegion(reached, W, H) { // 0..1 weight of a region to remove, grown by about a pixel
@@ -918,8 +926,10 @@ function generate({ items, occasion, weather, locks, avoid }) {
     }
     if (slots.bag && slots.shoes && slots.bag.color === slots.shoes.color) s += 0.4;
     if (weather === 'cold' && outers.length && !slots.outer) s -= 2.5;
-    if (avoid && key === avoid) s -= 3;
-    cand.set(key, { slots, key, score: s + Math.random() * 0.8 });
+    // Strongly demote the current outfit so Shuffle produces a real alternative.
+    if (avoid && key === avoid) s -= 12;
+    // Small controlled variation helps surface different equally-good combinations.
+    cand.set(key, { slots, key, score: s + Math.random() * 0.45 });
   }
   return { outfits: [...cand.values()].sort((a, b) => b.score - a.score).slice(0, 4), msg: '', note };
 }
