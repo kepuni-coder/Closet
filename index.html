@@ -19,7 +19,7 @@ img{max-width:100%}
 [hidden]{display:none!important}
 </style>
 <title>My Digital Closet</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..900&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..900&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Kaushan+Script&display=swap">
 <style>
 /* Concept: a tailor's workroom. Every piece gets a hang-tag label; outfits are laid out on a green cutting mat. */
 :root{
@@ -32,6 +32,9 @@ img{max-width:100%}
   --f-display:"Archivo","Arial Narrow","Helvetica Neue",Arial,sans-serif;
   --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-mono:"DM Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --f-script:"Kaushan Script","Segoe Script","Bradley Hand",cursive;
+  --linen:#E9E2D5; --brown:#7A3E22;
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -155,15 +158,25 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 /* outfits */
 .og{display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:800px){.og{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
-.board{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;background-color:var(--mat);
-  background-image:linear-gradient(var(--mat-line) 1px,transparent 1px),linear-gradient(90deg,var(--mat-line) 1px,transparent 1px),linear-gradient(var(--mat-line) 1px,transparent 1px),linear-gradient(90deg,var(--mat-line) 1px,transparent 1px);
-  background-size:10% 8%,10% 8%,2% 1.6%,2% 1.6%;background-blend-mode:normal}
-.board::after{content:"OUTFIT MAT  18 x 22";position:absolute;right:10px;bottom:8px;font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;color:var(--mat-line-strong)}
-.board.mini::after{display:none}
-.slot{position:absolute}
-.slot img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 10px var(--shadow))}
-.mini .slot img{filter:drop-shadow(0 3px 4px var(--shadow))}
-.lockb{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.board{position:relative;aspect-ratio:2/3;border-radius:6px;overflow:hidden;container-type:inline-size;background-color:var(--linen);background-image:radial-gradient(120% 90% at 50% 38%,transparent 58%,rgba(90,65,30,.16) 100%),var(--noise)}
+.btitle{position:absolute;left:4%;right:4%;top:2.2%;text-align:center;color:var(--brown);font-family:var(--f-script);font-size:26px;font-size:10.4cqw;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{position:absolute;left:4%;right:4%;top:8.6%;text-align:center;color:var(--brown);opacity:.85;font-family:var(--f-body);font-weight:500;font-size:11px;font-size:3.1cqw;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+.mini .btitle{font-size:13px;font-size:8.6cqw}
+.slot{position:absolute;display:flex;flex-direction:column;align-items:center;padding:0;border:0;background:none;cursor:pointer;color:inherit}
+.slot .pic{flex:1 1 0;min-height:0;width:100%;position:relative}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 5px rgba(60,38,18,.34));filter:drop-shadow(0 .9cqw 1.1cqw rgba(60,38,18,.34));pointer-events:none}
+.slot .cap{flex:none;margin-top:.5cqw;max-width:100%;color:var(--brown);font-family:var(--f-script);font-size:11px;font-size:3.5cqw;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .slot{cursor:default;pointer-events:none}
+.slot:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.acts{display:flex;gap:6px}
+.optgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.opt{display:grid;gap:4px;align-content:start;min-width:0;padding:6px;text-align:left;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer}
+.opt[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.oimg{position:relative;aspect-ratio:1;background:var(--tile);border-radius:6px}
+.oimg img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain}
+.oname{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ximg{display:block;width:100%;border-radius:8px}
+.lockb{position:absolute;top:2px;right:2px;z-index:4;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
 .empty-board{display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center}
 .empty-board p{max-width:28ch;background:var(--bg);padding:10px 12px;border-radius:6px}
 .panel{display:grid;gap:18px;min-width:0}
@@ -303,6 +316,8 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 </div></main>
 
 <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Piece details" tabindex="-1"></div></div>
+<div class="scrim" id="wscrim" hidden><div class="sheet" id="wsheet" role="dialog" aria-modal="true" aria-label="Swap piece" tabindex="-1"></div></div>
+<div class="scrim" id="xscrim" hidden><div class="sheet" id="xsheet" role="dialog" aria-modal="true" aria-label="Save image" tabindex="-1"></div></div>
 <div class="scrim" id="pscrim" hidden><div class="sheet" id="psheet" role="dialog" aria-modal="true" aria-label="Profiles" tabindex="-1"></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -486,13 +501,14 @@ const tFromStrength = s => 6 + s * 0.32;
 const CATS = [
   { id: 'top', label: 'Tops', one: 'Top' }, { id: 'bottom', label: 'Bottoms', one: 'Bottom' },
   { id: 'dress', label: 'Dresses', one: 'Dress' }, { id: 'outer', label: 'Outerwear', one: 'Outerwear' },
-  { id: 'shoes', label: 'Shoes', one: 'Shoes' }, { id: 'acc', label: 'Accessories', one: 'Accessory' }
+  { id: 'shoes', label: 'Shoes', one: 'Shoes' }, { id: 'bag', label: 'Bags', one: 'Bag' },
+  { id: 'jewelry', label: 'Jewelry', one: 'Jewelry' }, { id: 'acc', label: 'Accessories', one: 'Accessory' }
 ];
 const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
 const STYLES = [{ id: 'casual', label: 'Casual', lvl: 1 }, { id: 'smart', label: 'Smart', lvl: 2 }, { id: 'dressy', label: 'Dressy', lvl: 3 }, { id: 'active', label: 'Active', lvl: 0 }];
 const LVL = Object.fromEntries(STYLES.map(s => [s.id, s.lvl]));
 const WEIGHTS = [{ id: 'light', label: 'Light' }, { id: 'mid', label: 'Mid' }, { id: 'heavy', label: 'Heavy' }];
-const DEFAULT_WEIGHT = { top: 'light', bottom: 'mid', dress: 'light', outer: 'heavy', shoes: 'mid', acc: 'mid' };
+const DEFAULT_WEIGHT = { top: 'light', bottom: 'mid', dress: 'light', outer: 'heavy', shoes: 'mid', bag: 'mid', jewelry: 'light', acc: 'mid' };
 const COLORS = [
   { id: 'black', label: 'Black', hex: '#1C1C1E', neutral: true }, { id: 'white', label: 'White', hex: '#F4F4F1', neutral: true },
   { id: 'grey', label: 'Grey', hex: '#8E9196', neutral: true }, { id: 'beige', label: 'Beige', hex: '#D9C9AC', neutral: true },
@@ -502,7 +518,8 @@ const COLORS = [
   { id: 'green', label: 'Green', hex: '#3F7F50', hue: 135 }, { id: 'red', label: 'Red', hex: '#C23A32', hue: 3 },
   { id: 'burgundy', label: 'Burgundy', hex: '#6E1F2E', hue: 348 }, { id: 'pink', label: 'Pink', hex: '#E9A2B8', hue: 345 },
   { id: 'orange', label: 'Orange', hex: '#E07A2C', hue: 25 }, { id: 'yellow', label: 'Yellow', hex: '#E8C63A', hue: 50 },
-  { id: 'purple', label: 'Purple', hex: '#7650A8', hue: 270 }
+  { id: 'purple', label: 'Purple', hex: '#7650A8', hue: 270 },
+  { id: 'gold', label: 'Gold', hex: '#D4AF37', neutral: true, metal: true }, { id: 'silver', label: 'Silver', hex: '#BFC4CA', neutral: true, metal: true }
 ];
 const COL = Object.fromEntries(COLORS.map(c => [c.id, c]));
 const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
@@ -512,7 +529,8 @@ const state = {
   items: [], outfits: [], view: 'closet', filter: 'all', occasion: 'any', weather: 'mild', locks: {},
   current: null, alts: [], genMsg: '', genNote: '', queue: [], loading: false, ed: null,
   batchTotal: 0, batchIndex: 0, sheetId: null, sheetOpener: null, lastCat: 'top', flashId: null, outfitsDirty: true,
-  profiles: [], pid: 'me', lock: null, pf: { mode: 'list', name: '', color: '', editId: '', err: '' }
+  profiles: [], pid: 'me', lock: null, pf: { mode: 'list', name: '', color: '', editId: '', err: '' },
+  title: '', sub: '', titleEdited: false, labels: false, swapSlot: null, xurl: null
 };
 
 // ---------- storage (IndexedDB, with an in-memory fallback)
@@ -643,7 +661,7 @@ function detectColor(ed) {
     if (a[i] < 200) continue;
     rgb2lab(d[i * 4], d[i * 4 + 1], d[i * 4 + 2], lab, 0);
     let id = 'grey', bv = 1e9;
-    for (const c of COLORS) { const dl = (lab[0] - c.lab[0]) * 0.7, da = lab[1] - c.lab[1], db = lab[2] - c.lab[2], v = dl * dl + da * da + db * db; if (v < bv) { bv = v; id = c.id; } }
+    for (const c of COLORS) { if (c.metal && ed.cat !== 'jewelry') continue; const dl = (lab[0] - c.lab[0]) * 0.7, da = lab[1] - c.lab[1], db = lab[2] - c.lab[2], v = dl * dl + da * da + db * db; if (v < bv) { bv = v; id = c.id; } }
     tally[id] = (tally[id] || 0) + 1;
     if (tally[id] > bc) { bc = tally[id]; best = id; }
   }
@@ -830,12 +848,15 @@ function initPointer() {
   $('#brush').addEventListener('input', e => { if (state.ed) state.ed.brushPx = +e.target.value; });
 }
 
-// ---------- outfit maker
+// ---------- outfit maker (flat-lay boards)
 const OCC = [{ id: 'any', label: 'Anything' }, { id: 'casual', label: 'Casual' }, { id: 'work', label: 'Work' }, { id: 'night', label: 'Night out' }, { id: 'workout', label: 'Workout' }];
 const WX = [{ id: 'hot', label: 'Hot' }, { id: 'mild', label: 'Mild' }, { id: 'cold', label: 'Cold' }];
 const WF = { hot: { light: 1, mid: -0.5, heavy: -3 }, mild: { light: 0.5, mid: 1, heavy: -0.5 }, cold: { light: -1.5, mid: 0.5, heavy: 1.5 } };
-const SLOT_ORDER = ['outer', 'top', 'dress', 'bottom', 'shoes', 'acc'];
-const SLOT_BOX = { outer: [1, 9, 50, 42, -4, 1], top: [24, 3, 54, 36, 0, 3], dress: [22, 4, 56, 68, 0, 3], bottom: [27, 36, 46, 40, 0, 2], shoes: [27, 77, 46, 20, 0, 2], acc: [70, 46, 29, 26, 5, 4] };
+const SLOT_ORDER = ['outer', 'top', 'dress', 'bottom', 'shoes', 'bag', 'jewelry', 'jewelry2', 'acc'];
+const CORE = ['top', 'bottom', 'dress', 'outer', 'shoes'];
+const NOWX = ['acc', 'shoes', 'bag', 'jewelry'];
+const catOf = s => s.replace(/2$/, '');
+const keyOfSlots = sl => Object.values(sl).map(i => i.id).sort().join('|');
 const hueDiff = (a, b) => { const d = Math.abs(COL[a].hue - COL[b].hue); return Math.min(d, 360 - d); };
 function colorScore(ids) {
   const uniq = [...new Set(ids)], nn = uniq.filter(c => !COL[c].neutral);
@@ -862,32 +883,40 @@ function generate({ items, occasion, weather, locks, avoid }) {
   const rules = occasionRules(occasion); let note = '';
   let pool = items.filter(i => rules.allow.includes(LVL[i.style]));
   if (occasion === 'workout' && !pool.length) { pool = items.filter(i => LVL[i.style] === 1); note = 'noactive'; }
-  const locked = s => locks[s] ? items.find(i => i.id === locks[s]) : null;
-  const by = s => { const lk = locked(s); if (lk) return [lk]; if (s === 'outer' && weather === 'hot') return []; return pool.filter(i => i.cat === s); };
-  const tops = by('top'), bottoms = by('bottom'), dresses = by('dress'), outers = by('outer'), shoes = by('shoes'), accs = by('acc');
-  const canSep = tops.length && bottoms.length && !locked('dress');
-  const canDress = dresses.length && !locked('top') && !locked('bottom');
+  const lk = s => locks[s] ? items.find(i => i.id === locks[s]) : null;
+  const by = s => { const l = lk(s); if (l) return [l]; if (s === 'outer' && weather === 'hot') return []; return pool.filter(i => i.cat === s); };
+  const tops = by('top'), bottoms = by('bottom'), dresses = by('dress'), outers = by('outer'), shoes = by('shoes'), bags = by('bag'), accs = by('acc');
+  const jewels = pool.filter(i => i.cat === 'jewelry');
+  const canSep = tops.length && bottoms.length && !lk('dress');
+  const canDress = dresses.length && !lk('top') && !lk('bottom');
   if (!canSep && !canDress) {
-    const msg = !items.length ? 'Add some clothes and outfits will appear here.' : (occasion !== 'any' && pool.length < items.length && !pool.length) ? 'No pieces match that occasion yet. Try Anything.' : 'Add at least one top and one bottom, or a dress, to build outfits.';
+    const msg = !items.length ? 'Add some clothes and outfits will appear here.' : !pool.length ? 'No pieces match that occasion yet. Try Anything.' : 'Add at least one top and one bottom, or a dress, to build outfits.';
     return { outfits: [], msg, note };
   }
   const cand = new Map();
-  for (let k = 0; k < 500; k++) {
+  for (let k = 0; k < 600; k++) {
     const slots = {};
     if (canDress && (!canSep || Math.random() < 0.28)) slots.dress = pick(dresses); else { slots.top = pick(tops); slots.bottom = pick(bottoms); }
     if (shoes.length) slots.shoes = pick(shoes);
     if (outers.length && (locks.outer || Math.random() < (weather === 'cold' ? 0.95 : weather === 'mild' ? 0.35 : 0))) slots.outer = pick(outers);
-    if (accs.length && (locks.acc || Math.random() < 0.4)) slots.acc = pick(accs);
-    const its = Object.values(slots), key = its.map(i => i.id).sort().join('|');
+    if (bags.length && (locks.bag || Math.random() < 0.75)) slots.bag = pick(bags);
+    if (jewels.length && (lk('jewelry') || Math.random() < 0.8)) {
+      slots.jewelry = lk('jewelry') || pick(jewels);
+      const l2 = lk('jewelry2'), others = jewels.filter(j => j.id !== slots.jewelry.id);
+      if (l2) slots.jewelry2 = l2; else if (others.length && Math.random() < 0.4) slots.jewelry2 = pick(others);
+    }
+    if (accs.length && (locks.acc || Math.random() < 0.3)) slots.acc = pick(accs);
+    const its = Object.values(slots), key = keyOfSlots(slots);
     if (cand.has(key)) continue;
     let s = colorScore(its.map(i => i.color));
-    const lv = its.map(i => LVL[i.style]);
+    const lv = Object.entries(slots).filter(([sl]) => CORE.includes(sl)).map(([, i]) => LVL[i.style]);
     s -= rules.target !== null ? lv.reduce((t, l) => t + Math.abs(l - rules.target), 0) * 0.9 : (Math.max(...lv) - Math.min(...lv)) * 1.6;
     for (const i of its) {
-      if (i.cat !== 'acc' && i.cat !== 'shoes') s += WF[weather][i.weight];
+      if (!NOWX.includes(i.cat)) s += WF[weather][i.weight];
       if (i.fav) s += 0.35;
       const dd = daysSince(i.lastWorn); if (dd !== null) s -= dd < 1 ? 2.2 : dd < 3 ? 1.1 : 0;
     }
+    if (slots.bag && slots.shoes && slots.bag.color === slots.shoes.color) s += 0.4;
     if (weather === 'cold' && outers.length && !slots.outer) s -= 2.5;
     if (avoid && key === avoid) s -= 3;
     cand.set(key, { slots, key, score: s + Math.random() * 0.8 });
@@ -901,40 +930,80 @@ function explain(o) {
   if (!nn.length) t = `All neutrals (${list(nu)}), so every piece goes together.`;
   else if (nn.length === 1) t = nu.length ? `${list(nn)} is the only color, set against ${list(nu)}.` : `A single color from top to toe.`;
   else if (nn.length === 2) t = hueDiff(nn[0], nn[1]) < 25 ? `${list(nn)} sit close together on the color wheel.` : `${list(nn)} sit across the color wheel from each other.`;
-  else t = 'Several bold colors here. Keep one piece and shuffle the rest to calm it down.';
+  else t = 'Several bold colors here. Swap one piece to calm it down.';
+  if (o.slots.bag && o.slots.shoes && o.slots.bag.color === o.slots.shoes.color) t += ' The bag matches the shoes.';
   if (state.weather === 'hot') t += ' Light pieces for hot weather.';
   if (state.weather === 'cold') t += o.slots.outer ? ' Outerwear covers the cold.' : ' Add a jacket or coat to your closet for cold days.';
   return t;
 }
+function vibe() {
+  const o = state.occasion, w = state.weather;
+  const T = { casual: ['Easy Everyday', 'Weekend Mood', 'Casual Cutie'], work: ['Desk to Dinner', 'Work Day Ready', 'Dressed to Impress'], night: ['Night Out', 'Made to Shine', 'After Dark'], workout: ['Move Mode', 'Active Vibes', 'Ready to Go'] };
+  const TW = { cold: ['Cozy Days', 'Bundle Up', 'Layer Love'], hot: ['Sunny Day Fit', 'Easy Breezy', 'Warm Weather Wins'], mild: ["Today's Fit", 'Fresh Fit', 'Outfit Idea'] };
+  const S = { work: 'Polished • Easy • Put Together', night: 'Bold • Fun • Made to Shine', workout: 'Comfy • Flexible • Ready to Move', casual: 'Comfy • Cute • Easy', cold: 'Warm • Cute • Cozy', hot: 'Light • Cool • Easy', mild: 'Comfy • Cute • Ready to Go' };
+  return { title: pick(T[o] || TW[w]), sub: S[o] || S[w] };
+}
 function regen(avoidCurrent) {
   const res = generate({ items: state.items, occasion: state.occasion, weather: state.weather, locks: state.locks, avoid: avoidCurrent && state.current ? state.current.key : null });
   state.current = res.outfits[0] || null; state.alts = res.outfits.slice(1, 4); state.genMsg = res.msg; state.genNote = res.note; state.outfitsDirty = false;
+  if (!state.titleEdited) { const v = vibe(); state.title = v.title; state.sub = v.sub; }
   renderOutfits();
 }
-function boardHTML(slots, mini, locks) {
-  let s = '';
-  for (const slot of SLOT_ORDER) {
-    const it = slots[slot]; if (!it) continue;
-    const [l, t, w, h, r, z] = SLOT_BOX[slot];
-    s += `<div class="slot" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;z-index:${z};transform:rotate(${r}deg)"><img src="${it.url}" alt="${esc(it.name)}">${locks && locks[slot] ? `<span class="lockb">${ICON_LOCK}</span>` : ''}</div>`;
+
+// flat-lay layout: two columns (clothes left, small things right) in a 100 x 150 board
+const Y0 = 18, Y1 = 147, GAPH = 2.4;
+const HL = { outer: 44, top: 48, bottom: 82, dress: 112 }, HR = { jewelry: 26, jewelry2: 26, bag: 34, acc: 24, shoes: 42 };
+function jit(slot, id) {
+  let h = 2166136261; for (const c of slot + id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const r = () => { h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0; return (h % 1000) / 1000 - 0.5; };
+  const small = !CORE.includes(slot) || slot === 'shoes';
+  return [r() * (small ? 12 : 5), r() * 2.4, r() * 1.6];
+}
+function stackCol(list, x, w, hm, capH) {
+  const tot = list.reduce((t, s) => t + hm[s] + capH, 0), avail = Y1 - Y0 - GAPH * (list.length - 1), k = Math.min(1.7, avail / tot);
+  let y = Y0 + Math.max(0, (Y1 - Y0 - (tot * k + GAPH * (list.length - 1))) / 2);
+  return list.map(sl => { const h = hm[sl] * k + capH; const r = { slot: sl, x, y, w, h }; y += h + GAPH; return r; });
+}
+function layoutBoard(slots, labels) {
+  const left = ['outer', 'top', 'dress', 'bottom'].filter(s => slots[s]), right = ['jewelry', 'jewelry2', 'bag', 'acc', 'shoes'].filter(s => slots[s]), capH = labels ? 5 : 0;
+  const cols = right.length ? [[left, 3, 56, HL], [right, 62, 35, HR]] : [[left, 20, 60, HL]], out = [];
+  for (const [list, x, w, hm] of cols) for (const r of stackCol(list, x, w, hm, capH)) {
+    const it = slots[r.slot], j = jit(r.slot, it.id);
+    out.push({ ...r, it, rot: j[0], x: r.x + j[1], y: r.y + j[2], z: r.slot === 'outer' ? 1 : CORE.includes(r.slot) ? 2 : 3 });
   }
-  return `<div class="board${mini ? ' mini' : ''}">${s}</div>`;
+  return out;
+}
+function boardHTML(slots, o = {}) {
+  const { mini = false, locks = null, title = '', sub = '', labels = false } = o;
+  let s = '';
+  for (const r of layoutBoard(slots, labels && !mini)) {
+    const st = `left:${r.x.toFixed(2)}%;top:${(r.y / 1.5).toFixed(2)}%;width:${r.w.toFixed(2)}%;height:${(r.h / 1.5).toFixed(2)}%;z-index:${r.z};transform:rotate(${r.rot.toFixed(2)}deg)`;
+    const inner = `<span class="pic"><img src="${r.it.url}" alt="${mini ? '' : esc(r.it.name)}"></span>${labels && !mini ? `<span class="cap">${esc(r.it.name)}</span>` : ''}${locks && locks[r.slot] ? `<span class="lockb">${ICON_LOCK}</span>` : ''}`;
+    s += mini ? `<div class="slot" style="${st}">${inner}</div>` : `<button type="button" class="slot" data-act="swap-open" data-v="${r.slot}" style="${st}" aria-label="Swap ${esc(r.it.name)}">${inner}</button>`;
+  }
+  return `<div class="board${mini ? ' mini' : ''}">${title ? `<div class="btitle">${esc(title)}</div>` : ''}${!mini && sub ? `<div class="bsub">${esc(sub)}</div>` : ''}${s}</div>`;
 }
 function renderOutfits() {
   const o = state.current;
-  $('#og-board').innerHTML = o ? boardHTML(o.slots, false, state.locks)
+  $('#og-board').innerHTML = o ? boardHTML(o.slots, { locks: state.locks, title: state.title, sub: state.sub, labels: state.labels })
     : `<div class="board empty-board"><p>${esc(state.genMsg || 'Add some clothes and outfits will appear here.')}</p><button type="button" class="btn primary" data-act="tab" data-v="add">Add clothes</button></div>`;
   const rows = o ? SLOT_ORDER.filter(s => o.slots[s]).map(s => { const it = o.slots[s], on = !!state.locks[s]; return `
     <li class="prow"><span class="th"><img src="${it.url}" alt=""></span><div><b>${esc(it.name)}</b><span class="mono">${CAT[it.cat].one} · ${COL[it.color].label}</span></div>
-    <button type="button" class="btn small" data-act="lock" data-v="${s}" aria-pressed="${on}" aria-label="${on ? 'Unlock' : 'Keep'} ${esc(it.name)} when shuffling">${ICON_LOCK} ${on ? 'Kept' : 'Keep'}</button></li>`; }).join('') : '';
+    <span class="acts"><button type="button" class="btn small" data-act="swap-open" data-v="${s}">Swap</button>
+    <button type="button" class="btn small" data-act="lock" data-v="${s}" aria-pressed="${on}" aria-label="${on ? 'Unlock' : 'Keep'} ${esc(it.name)} when shuffling">${ICON_LOCK} ${on ? 'Kept' : 'Keep'}</button></span></li>`; }).join('') : '';
+  const count = c => state.items.filter(i => i.cat === c).length;
+  const addable = o ? ['outer', 'shoes', 'bag', 'jewelry', 'jewelry2', 'acc'].filter(s => !o.slots[s] && (s === 'jewelry2' ? o.slots.jewelry && count('jewelry') > 1 : count(catOf(s)) > 0)) : [];
   $('#og-panel').innerHTML = `
     <h2>Today's outfit</h2>
+    ${o ? `<div class="field"><label class="lbl" for="og-title">Board title</label><input class="input" id="og-title" type="text" maxlength="32" value="${esc(state.title)}" autocomplete="off"></div>` : ''}
     <div class="field"><span class="lbl">Occasion</span><div class="chips">${OCC.map(x => chip('occ', x.id, x.label, state.occasion === x.id)).join('')}</div>
       ${state.genNote === 'noactive' && state.occasion === 'workout' ? '<p class="hint">No pieces are marked Active yet, so these are casual pieces. Set a piece to Active from the closet.</p>' : ''}</div>
     <div class="field"><span class="lbl">Weather</span><div class="chips">${WX.map(x => chip('wx', x.id, x.label, state.weather === x.id)).join('')}</div></div>
-    <div class="row"><button type="button" class="btn primary" data-act="shuffle">Shuffle outfit</button><button type="button" class="btn" data-act="save-look" ${o ? '' : 'disabled'}>Save look</button></div>
-    ${o ? `<p class="why">${esc(explain(o))}</p><div class="field"><span class="lbl">Pieces. Keep one to hold it while you shuffle.</span><ul class="prows">${rows}</ul></div>` : ''}
-    ${state.alts.length ? `<div class="field"><span class="lbl">More options</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, true)}</button>`).join('')}</div></div>` : ''}`;
+    <div class="row"><button type="button" class="btn primary" data-act="shuffle">Shuffle outfit</button><button type="button" class="btn" data-act="save-look" ${o ? '' : 'disabled'}>Save look</button><button type="button" class="btn" data-act="save-img" ${o ? '' : 'disabled'}>Save image</button></div>
+    ${o ? `<div class="chips">${chip('labels', 'x', 'Show item names', state.labels)}</div><p class="why">${esc(explain(o))}</p>
+      <div class="field"><span class="lbl">Pieces. Tap any piece on the board to swap it, or keep one while you shuffle.</span><ul class="prows">${rows}</ul></div>
+      ${addable.length ? `<div class="field"><span class="lbl">Add to this outfit</span><div class="chips">${addable.map(sl => `<button type="button" class="chip" data-act="swap-open" data-v="${sl}">+ ${sl === 'jewelry2' ? 'More jewelry' : CAT[catOf(sl)].one}</button>`).join('')}</div></div>` : ''}` : ''}
+    ${state.alts.length ? `<div class="field"><span class="lbl">More options</span><div class="alts">${state.alts.map((a, i) => `<button type="button" class="alt" data-act="alt" data-v="${i}" aria-label="Show option ${i + 1}">${boardHTML(a.slots, { mini: true })}</button>`).join('')}</div></div>` : ''}`;
   renderLooks();
 }
 function renderLooks() {
@@ -942,7 +1011,58 @@ function renderLooks() {
   const looks = state.outfits.map(o => ({ o, slots: Object.fromEntries(Object.entries(o.ids).map(([s, id]) => [s, getItem(id)]).filter(([, it]) => it)) })).filter(l => Object.keys(l.slots).length > 1);
   if (!looks.length) { box.className = ''; box.innerHTML = '<p class="hint">Looks you save appear here.</p>'; return; }
   box.className = 'looks';
-  box.innerHTML = looks.map(l => `<div class="look">${boardHTML(l.slots, true)}<div class="row"><button type="button" class="btn small" data-act="look-wore" data-id="${l.o.id}">Wore it</button><button type="button" class="btn small danger" data-act="look-del" data-id="${l.o.id}">Delete</button></div></div>`).join('');
+  box.innerHTML = looks.map(l => `<div class="look">${boardHTML(l.slots, { mini: true, title: l.o.title || '' })}<div class="row"><button type="button" class="btn small" data-act="look-open" data-id="${l.o.id}">Open</button><button type="button" class="btn small" data-act="look-wore" data-id="${l.o.id}">Wore it</button><button type="button" class="btn small danger" data-act="look-del" data-id="${l.o.id}">Delete</button></div></div>`).join('');
+}
+
+// swap sheet
+function renderSwap() {
+  const o = state.current, slot = state.swapSlot; if (!o || !slot) return;
+  const cat = catOf(slot), cur = o.slots[slot], usedElsewhere = new Set(Object.entries(o.slots).filter(([k]) => k !== slot).map(([, i]) => i.id));
+  const list = state.items.filter(i => i.cat === cat && !usedElsewhere.has(i.id)), one = CAT[cat].one.toLowerCase();
+  const hasD = state.items.some(i => i.cat === 'dress'), hasSep = state.items.some(i => i.cat === 'top') && state.items.some(i => i.cat === 'bottom');
+  $('#wsheet').innerHTML = `<div class="sheet-head"><h2>${cur ? 'Swap' : 'Add'} ${esc(one)}</h2><button type="button" class="btn small" data-act="swap-close">Done</button></div>
+    ${list.length ? `<div class="optgrid">${list.map(i => `<button type="button" class="opt" data-act="swap-pick" data-id="${i.id}" aria-current="${!!cur && cur.id === i.id}"><span class="oimg"><img src="${i.url}" alt=""></span><span class="oname">${esc(i.name)}</span><span class="mono">${COL[i.color].label}</span></button>`).join('')}</div>` : `<p class="hint">You don't have any ${esc(one)} pieces in your closet yet.</p>`}
+    ${cur && !['top', 'bottom', 'dress'].includes(slot) ? '<button type="button" class="btn" data-act="swap-remove">Remove from outfit</button>' : ''}
+    ${(slot === 'top' || slot === 'bottom') && hasD ? '<button type="button" class="btn" data-act="swap-dress">Wear a dress instead</button>' : ''}
+    ${slot === 'dress' && hasSep ? '<button type="button" class="btn" data-act="swap-sep">Wear separate pieces instead</button>' : ''}`;
+}
+function openSwap(slot) { if (!state.current) return; state.swapSlot = slot; renderSwap(); $('#wscrim').hidden = false; $('#wsheet').scrollTop = 0; $('#wsheet').focus(); }
+function closeSwap() { $('#wscrim').hidden = true; state.swapSlot = null; }
+
+// save the board as a picture
+function closeX() { if ($('#xscrim').hidden) return; $('#xscrim').hidden = true; if (state.xurl) { URL.revokeObjectURL(state.xurl); state.xurl = null; } }
+async function exportImage() {
+  const o = state.current; if (!o) return;
+  toast('Making your image…');
+  const W = 1080, H = 1620, u = W / 100, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d'); x.fillStyle = '#E9E2D5'; x.fillRect(0, 0, W, H);
+  const g = document.createElement('canvas'); g.width = g.height = 200; const gx = g.getContext('2d'), gd = gx.createImageData(200, 200);
+  for (let i = 0; i < gd.data.length; i += 4) { const v = 70 + Math.random() * 60; gd.data[i] = v; gd.data[i + 1] = v * 0.85; gd.data[i + 2] = v * 0.65; gd.data[i + 3] = Math.random() * 26; }
+  gx.putImageData(gd, 0, 0); x.fillStyle = x.createPattern(g, 'repeat'); x.fillRect(0, 0, W, H);
+  const vg = x.createRadialGradient(W / 2, H * 0.4, H * 0.3, W / 2, H * 0.45, H * 0.78); vg.addColorStop(0, 'rgba(90,65,30,0)'); vg.addColorStop(1, 'rgba(90,65,30,.16)'); x.fillStyle = vg; x.fillRect(0, 0, W, H);
+  try { await Promise.all([document.fonts.load('80px "Kaushan Script"'), document.fonts.load('500 24px "Instrument Sans"')]); } catch (e) { }
+  const title = state.title || '', sub = state.sub || '', fam = '"Kaushan Script","Segoe Script",cursive';
+  x.textAlign = 'center'; x.fillStyle = '#7A3E22';
+  if (title) { let fs = 10.4 * u; x.font = `${fs}px ${fam}`; while (fs > 30 && x.measureText(title).width > W * 0.92) { fs -= 4; x.font = `${fs}px ${fam}`; } x.fillText(title, W / 2, 11.4 * u); }
+  if (sub) { x.globalAlpha = 0.85; x.font = `500 ${3.1 * u}px "Instrument Sans",sans-serif`; try { x.letterSpacing = (0.18 * 3.1 * u) + 'px'; } catch (e) { } x.fillText(sub.toUpperCase(), W / 2, 15.6 * u); x.globalAlpha = 1; try { x.letterSpacing = '0px'; } catch (e) { } }
+  const lay = layoutBoard(o.slots, state.labels);
+  let imgs; try { imgs = await Promise.all(lay.map(async r => { const im = new Image(); im.src = r.it.url; await im.decode(); return im; })); } catch (e) { toast("Couldn't make the image."); return; }
+  lay.forEach((r, i) => {
+    const im = imgs[i], cap = state.labels ? 5 : 0, bw = r.w * u, bh = (r.h - cap) * u, sc = Math.min(bw / im.naturalWidth, bh / im.naturalHeight), dw = im.naturalWidth * sc, dh = im.naturalHeight * sc;
+    x.save(); x.translate((r.x + r.w / 2) * u, (r.y + r.h / 2) * u); x.rotate(r.rot * Math.PI / 180);
+    x.shadowColor = 'rgba(60,38,18,.34)'; x.shadowBlur = 2.2 * u; x.shadowOffsetY = 0.9 * u;
+    x.drawImage(im, -dw / 2, -r.h * u / 2 + (bh - dh) / 2, dw, dh);
+    x.shadowColor = 'transparent';
+    if (state.labels) { let t = r.it.name; x.fillStyle = '#7A3E22'; x.font = `${3.5 * u}px ${fam}`; while (t.length > 3 && x.measureText(t).width > bw) t = t.slice(0, -2); if (t !== r.it.name) t += '…'; x.fillText(t, 0, r.h * u / 2 - 1.1 * u); }
+    x.restore();
+  });
+  const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+  if (!blob) { toast("Couldn't make the image."); return; }
+  const name = `outfit-${(title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'board')}.png`, file = new File([blob], name, { type: 'image/png' });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: title || 'Outfit' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  closeX(); state.xurl = URL.createObjectURL(blob);
+  $('#xsheet').innerHTML = `<div class="sheet-head"><h2>Your outfit</h2><button type="button" class="btn small" data-act="x-close">Done</button></div><img class="ximg" id="ximg" src="${state.xurl}" alt="Your outfit board"><p class="hint">On iPhone or iPad, press and hold the picture, then tap Save to Photos.</p><a class="btn primary" href="${state.xurl}" download="${esc(name)}" style="display:grid;place-items:center;text-decoration:none">Download image</a>`;
+  $('#xscrim').hidden = false; $('#xsheet').scrollTop = 0;
 }
 
 // ---------- sample pieces
@@ -962,7 +1082,7 @@ const SAMPLES = [
   ['Beige chinos', 'bottom', 'beige', 'smart', 'mid', 'pants', '#D2BE98'], ['Black trousers', 'bottom', 'black', 'smart', 'mid', 'pants', '#26272B'],
   ['Burgundy dress', 'dress', 'burgundy', 'dressy', 'light', 'dress', '#6E2234'], ['Olive jacket', 'outer', 'olive', 'casual', 'heavy', 'jacket', '#66693F'],
   ['White sneakers', 'shoes', 'white', 'casual', 'mid', 'sneaker', '#F4F4F2'], ['Brown boots', 'shoes', 'brown', 'smart', 'mid', 'boot', '#6A4630'],
-  ['Tan tote', 'acc', 'brown', 'casual', 'mid', 'bag', '#A9714A']
+  ['Tan tote', 'bag', 'brown', 'casual', 'mid', 'bag', '#A9714A']
 ];
 async function drawSample(shape, fill) {
   const c = document.createElement('canvas'); c.width = c.height = 480; const x = c.getContext('2d');
@@ -1161,7 +1281,7 @@ document.addEventListener('click', async e => {
     case 'ed-undo': if (ed && ed.undo.length) { ed.alpha = ed.undo.pop(); paint(); coverageNote(ed); afterEdit(); } break;
     case 'ed-orig': if (ed) { ed.showOrig = !ed.showOrig; el.setAttribute('aria-pressed', ed.showOrig); el.textContent = ed.showOrig ? 'Show cut-out' : 'Show original'; $('#tools').classList.toggle('dim', ed.showOrig); $('#ring').hidden = true; paint(); } break;
     case 'ed-reset': if (ed) { ed.strength = 30; $('#strength').value = 30; ed.showOrig = false; $('#btn-orig').setAttribute('aria-pressed', 'false'); $('#btn-orig').textContent = 'Show original'; $('#tools').classList.remove('dim'); ed.colorTouched = false; runAuto(ed); } break;
-    case 'ed-cat': if (ed) { ed.cat = v; if (!ed.weightTouched) ed.weight = DEFAULT_WEIGHT[v]; renderEdFields(); } break;
+    case 'ed-cat': if (ed) { ed.cat = v; if (!ed.weightTouched) ed.weight = DEFAULT_WEIGHT[v]; if (!ed.colorTouched) ed.color = detectColor(ed); renderEdFields(); } break;
     case 'ed-color': if (ed) { ed.color = v; ed.colorTouched = true; renderEdFields(); } break;
     case 'ed-style': if (ed) { ed.style = v; renderEdFields(); } break;
     case 'ed-weight': if (ed) { ed.weight = v; ed.weightTouched = true; renderEdFields(); } break;
@@ -1176,17 +1296,47 @@ document.addEventListener('click', async e => {
     case 'sh-fav': { const it = getItem(state.sheetId); if (it) { it.fav = !it.fav; refreshSheet(); persistItem(it); } break; }
     case 'sh-worn': { const it = getItem(state.sheetId); if (it) { it.lastWorn = Date.now(); refreshSheet(); persistItem(it); toast('Marked as worn today'); } break; }
     case 'sh-del': armDelete(el, () => deleteItem(state.sheetId)); break;
-    case 'occ': state.occasion = v; state.locks = {}; regen(); break;
-    case 'wx': state.weather = v; regen(); break;
+    case 'occ': state.occasion = v; state.locks = {}; state.titleEdited = false; regen(); break;
+    case 'wx': state.weather = v; state.titleEdited = false; regen(); break;
     case 'shuffle': regen(true); break;
-    case 'lock': { const o = state.current; if (!o) break; if (state.locks[v]) delete state.locks[v]; else state.locks[v] = o.slots[v].id; renderOutfits(); break; }
+    case 'labels': state.labels = !state.labels; renderOutfits(); break;
+    case 'lock': { const o = state.current; if (!o || !o.slots[v]) break; if (state.locks[v]) delete state.locks[v]; else state.locks[v] = o.slots[v].id; renderOutfits(); break; }
     case 'alt': { const i = +v, a = state.alts[i]; if (a) { state.alts[i] = state.current; state.current = a; renderOutfits(); } break; }
+    case 'swap-open': openSwap(v); break;
+    case 'swap-close': closeSwap(); break;
+    case 'swap-pick': {
+      const o = state.current, it = getItem(el.dataset.id), sl = state.swapSlot; if (!o || !it || !sl) break;
+      o.slots[sl] = it; if (state.locks[sl]) state.locks[sl] = it.id; o.key = keyOfSlots(o.slots); closeSwap(); renderOutfits(); break;
+    }
+    case 'swap-remove': {
+      const o = state.current, sl = state.swapSlot; if (!o || !sl) break;
+      delete o.slots[sl]; delete state.locks[sl];
+      if (sl === 'jewelry' && o.slots.jewelry2) { o.slots.jewelry = o.slots.jewelry2; delete o.slots.jewelry2; if (state.locks.jewelry2) { state.locks.jewelry = state.locks.jewelry2; delete state.locks.jewelry2; } }
+      o.key = keyOfSlots(o.slots); closeSwap(); renderOutfits(); break;
+    }
+    case 'swap-dress': {
+      const o = state.current, ds = state.items.filter(i => i.cat === 'dress'); if (!o || !ds.length) break;
+      o.slots.dress = pick(ds); delete o.slots.top; delete o.slots.bottom; delete state.locks.top; delete state.locks.bottom; o.key = keyOfSlots(o.slots); closeSwap(); renderOutfits(); break;
+    }
+    case 'swap-sep': {
+      const o = state.current, ts = state.items.filter(i => i.cat === 'top'), bs = state.items.filter(i => i.cat === 'bottom'); if (!o || !ts.length || !bs.length) break;
+      o.slots.top = pick(ts); o.slots.bottom = pick(bs); delete o.slots.dress; delete state.locks.dress; o.key = keyOfSlots(o.slots); closeSwap(); renderOutfits(); break;
+    }
+    case 'save-img': exportImage(); break;
+    case 'x-close': closeX(); break;
     case 'save-look': {
       const o = state.current; if (!o) break;
-      const ids = Object.fromEntries(Object.entries(o.slots).map(([s, it]) => [s, it.id]));
+      const ids = Object.fromEntries(Object.entries(o.slots).map(([sl, it]) => [sl, it.id]));
       const key = Object.values(ids).sort().join('|');
       if (state.outfits.some(x => Object.values(x.ids).sort().join('|') === key)) { toast('That look is already saved'); break; }
-      const rec = { id: uid(), ids, created: Date.now(), pid: state.pid }; state.outfits.unshift(rec); await DB.put('outfits', rec); renderLooks(); toast('Look saved'); break;
+      const rec = { id: uid(), ids, title: state.title, created: Date.now(), pid: state.pid }; state.outfits.unshift(rec); await DB.put('outfits', rec); renderLooks(); toast('Look saved'); break;
+    }
+    case 'look-open': {
+      const rec = state.outfits.find(x => x.id === el.dataset.id); if (!rec) break;
+      const slots = Object.fromEntries(Object.entries(rec.ids).map(([sl, id]) => [sl, getItem(id)]).filter(([, it]) => it));
+      if (Object.keys(slots).length < 2) break;
+      state.current = { slots, key: keyOfSlots(slots), score: 0 }; state.alts = []; state.locks = {}; state.title = rec.title || state.title; state.titleEdited = true;
+      renderOutfits(); window.scrollTo(0, 0); toast('Loaded onto the board'); break;
     }
     case 'look-wore': {
       const o = state.outfits.find(x => x.id === el.dataset.id); if (!o) break;
@@ -1200,11 +1350,14 @@ document.addEventListener('input', e => {
   if (e.target.id === 's-name') { const it = getItem(state.sheetId); if (it) { it.name = e.target.value || 'Untitled'; clearTimeout(nameTimer); nameTimer = setTimeout(() => persistItem(it), 450); } }
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (!$('#pscrim').hidden) closeProf(); else if (state.sheetId) closeSheet(); }
+  if (e.key === 'Escape') { if (!$('#wscrim').hidden) closeSwap(); else if (!$('#xscrim').hidden) closeX(); else if (!$('#pscrim').hidden) closeProf(); else if (state.sheetId) closeSheet(); }
   if (e.key === 'Enter' && (e.target.id === 'pf-pin' || e.target.id === 'pf-name')) { const b = $('#psheet .btn.primary'); if (b) b.click(); }
 });
 $('#scrim').addEventListener('click', e => { if (e.target.id === 'scrim') closeSheet(); });
 $('#pscrim').addEventListener('click', e => { if (e.target.id === 'pscrim') closeProf(); });
+$('#wscrim').addEventListener('click', e => { if (e.target.id === 'wscrim') closeSwap(); });
+$('#xscrim').addEventListener('click', e => { if (e.target.id === 'xscrim') closeX(); });
+document.addEventListener('input', e => { if (e.target.id === 'og-title') { state.title = e.target.value; state.titleEdited = true; const t = $('#og-board .btitle'); if (t) t.textContent = state.title; } });
 for (const id of ['#file-pick', '#file-cam']) $(id).addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; ingest(files); });
 $('#file-bk').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) restoreBackup(f); });
 const drop = $('#drop');
