@@ -461,6 +461,30 @@ dialog,[role="dialog"],.popover,.dropdown,.menu{
  .planner-actions .btn{flex:1 1 auto}
 }
 
+
+/* Planner tab visibility fix: four explicit navigation columns on every viewport */
+header .tabs{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  flex:1 1 100%!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  overflow:visible!important;
+  gap:2px!important;
+}
+header .tabs button{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-width:0!important;
+  width:100%!important;
+  white-space:nowrap!important;
+  padding:11px 2px 9px!important;
+  font-size:clamp(10px,2.7vw,14px)!important;
+  letter-spacing:.02em!important;
+}
+
 </style>
 </head>
 <body>
