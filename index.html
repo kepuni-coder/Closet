@@ -147,7 +147,7 @@ hr{border:0;border-top:1px dashed var(--line);margin:4px 0;width:100%}
 @media(min-width:820px){.ed-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}
 .ed-col{display:grid;gap:16px;min-width:0;align-content:start}
 .stage{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background-color:var(--chk1);background-image:conic-gradient(var(--chk2) 25%,transparent 0 50%,var(--chk2) 0 75%,transparent 0);background-size:18px 18px;touch-action:none}
-.ghost-guide{position:absolute;inset:3% 8%;width:84%;height:94%;pointer-events:none;opacity:.42;z-index:0}
+.ghost-guide{position:absolute;inset:3% 8%;width:84%;height:94%;pointer-events:none;opacity:.58;z-index:3;display:block}
 .ghost-guide[hidden]{display:none}
 #cv{position:relative;z-index:1;display:block;margin:0 auto;max-width:100%;max-height:62vh;width:auto;height:auto;touch-action:none;cursor:crosshair}
 .ring{position:absolute;z-index:2;border:2px solid var(--accent);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(255,255,255,.85)}
@@ -561,7 +561,7 @@ header .tabs button{
         <div class="stage" id="stage">
           <svg class="ghost-guide" id="ghost-guide" viewBox="0 0 240 360" aria-hidden="true" hidden>
             <defs><linearGradient id="ghost-fill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e8cbd9"/></linearGradient></defs>
-            <g fill="url(#ghost-fill)" stroke="#bd83a2" stroke-width="2.5" stroke-linejoin="round">
+            <g fill="url(#ghost-fill)" stroke="#a34f7c" stroke-width="3.5" stroke-linejoin="round">
               <path d="M92 42 C92 18 148 18 148 42 L148 63 C148 78 163 84 178 92 L211 120 L193 143 L164 121 L158 157 L173 225 L151 238 L120 222 L89 238 L67 225 L82 157 L76 121 L47 143 L29 120 L62 92 C77 84 92 78 92 63 Z"/>
               <path d="M84 236 L156 236 L167 330 L139 330 L120 271 L101 330 L73 330 Z"/>
             </g>
